@@ -69,7 +69,7 @@ h1 .cross { color: var(--accent); }
 .day .count { font-size: 0.72rem; color: var(--muted); }
 .day[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
 .day[aria-pressed="true"] .dow, .day[aria-pressed="true"] .count { color: var(--accent-fg); opacity: 0.85; }
-.day:focus-visible, button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.day:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .summary { margin: 0; color: var(--muted); font-size: 0.92rem; }
 .summary strong { color: var(--fg); }
@@ -126,15 +126,6 @@ details.squad .finns { margin-top: 6px; }
 .match.nt .body { padding-left: 14px; }
 .nt-flag { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
 
-/* Report form */
-.report { display: grid; gap: 8px; background: var(--quiet-soft); border-radius: 8px; padding: 10px; }
-.report label { font-size: 0.85rem; font-weight: 500; }
-.report textarea { font: inherit; font-size: 0.92rem; min-height: 64px; padding: 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); resize: vertical; }
-.report .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.btn { font: inherit; font-size: 0.88rem; font-weight: 600; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg); cursor: pointer; }
-.btn.secondary { background: none; color: var(--accent); }
-.btn:disabled { opacity: 0.6; cursor: default; }
-.report .msg { font-size: 0.85rem; color: var(--muted); }
 
 .empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; padding: 24px; text-align: center; color: var(--muted); }
 .empty strong { display: block; color: var(--fg); font-family: var(--display); font-size: 1.3rem; font-weight: 600; margin-bottom: 4px; }
@@ -172,8 +163,7 @@ footer p { margin: 0; }
   <footer>
     <p id="updated"></p>
     <p>Times are Finnish time. Match data from ESPN. Streaming info is checked by hand and may be out of date.</p>
-    <p><button class="link-btn" id="general-report" type="button">Spotted an error? Tell us</button></p>
-    <div id="general-report-slot"></div>
+    <p><a class="link-btn" id="general-report" target="_blank" rel="noopener">Spotted an error? Tell us</a></p>
   </footer>
 </div>
 
@@ -331,88 +321,34 @@ function matchCard(m) {
   } else {
     watch.append(el("span", "svc", "No known Finnish broadcaster"));
   }
-  const reportBtn = el("button", "link-btn", "Spotted an error?");
-  reportBtn.type = "button";
-  const slot = el("div");
-  reportBtn.addEventListener("click", () => openReportForm(slot, m));
-  foot.append(watch, reportBtn);
-  body.append(foot, slot);
+  const reportLink = el("a", "link-btn", "Spotted an error?");
+  reportLink.href = reportUrl(m);
+  reportLink.target = "_blank";
+  reportLink.rel = "noopener";
+  foot.append(watch, reportLink);
+  body.append(foot);
 
   card.append(body);
   return card;
 }
 
 // ---------------------------------------------------------------------------
-// 3. "Spotted an error?" reports.
-//    Reports are saved in the page's private database. Each visitor can
-//    write their own reports; only the site owner can read them all.
+// 3. "Spotted an error?" links.
+//    Reports go to a Google Form. A match's link opens the form with the
+//    match already filled in ("pre-filled"), so the visitor only writes
+//    what's wrong.
 // ---------------------------------------------------------------------------
-let dbPromise = null;
-function getDb() {
-  if (!dbPromise) {
-    dbPromise = (async () => {
-      if (!window.claude?.use) return null;
-      const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
-      if (!db || !user) return null;
-      return { db, userId: await user.id() };
-    })().catch(() => null);
-  }
-  return dbPromise;
+const REPORT_FORM = "https://docs.google.com/forms/d/e/1FAIpQLScvbtU5Vaj0a89T3tFMCZCJkWVmOl59chMgaz5YRGPupqtWaA/viewform";
+const MATCH_FIELD = "entry.2096274022";   // the form's "Which match?" question
+
+function reportUrl(match) {
+  if (!match) return REPORT_FORM;
+  const [y, mo, d] = match.date_fi.split("-").map(Number);
+  const label = match.home.name + " – " + match.away.name + ", " + d + "." + mo + "." + y + " (" + match.league_name + ")";
+  return REPORT_FORM + "?usp=pp_url&" + MATCH_FIELD + "=" + encodeURIComponent(label);
 }
 
-function openReportForm(slot, match) {
-  if (slot.firstChild) { slot.replaceChildren(); return; }   // second click closes it
-  const form = el("form", "report");
-  const id = "report-" + (match ? match.id : "general");
-  const label = el("label", null, match
-    ? "What's wrong with " + match.home.name + " – " + match.away.name + "?"
-    : "What did you spot?");
-  label.htmlFor = id;
-  const text = el("textarea");
-  text.id = id;
-  text.placeholder = match ? "e.g. This match is on Viaplay, not MTV" : "e.g. A Finnish player is missing";
-  const row = el("div", "row");
-  const send = el("button", "btn", "Send report");
-  send.type = "submit";
-  const cancel = el("button", "btn secondary", "Cancel");
-  cancel.type = "button";
-  cancel.addEventListener("click", () => slot.replaceChildren());
-  const msg = el("span", "msg");
-  row.append(send, cancel, msg);
-  form.append(label, text, row);
-  slot.replaceChildren(form);
-  text.focus();
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const message = text.value.trim();
-    if (!message) { msg.textContent = "Write a short note first."; return; }
-    send.disabled = true;
-    msg.textContent = "Sending…";
-    const conn = await getDb();
-    if (!conn) {
-      msg.textContent = "Reports need you to be signed in to claude.ai. Sorry about that.";
-      send.disabled = false;
-      return;
-    }
-    try {
-      await conn.db.collection("reports/" + conn.userId + "/items").add({
-        message,
-        match_id: match ? match.id : null,
-        match: match ? match.home.name + " – " + match.away.name + " (" + match.date_fi + ")" : null,
-        competition: match ? match.league : null,
-        sent: new Date().toISOString(),
-      });
-      slot.replaceChildren(el("p", "msg", "Thanks! Your report was sent."));
-    } catch (err) {
-      msg.textContent = "Couldn't send the report. Try again in a moment.";
-      send.disabled = false;
-    }
-  });
-}
-
-document.getElementById("general-report").addEventListener("click", () =>
-  openReportForm(document.getElementById("general-report-slot"), null));
+document.getElementById("general-report").href = reportUrl(null);
 
 loadData();
 </script>
