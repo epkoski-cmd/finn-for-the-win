@@ -1,5 +1,5 @@
 {
-  "_about": "Where each competition can be watched legally in Finland. Edited by hand, checked once a season. 'confidence': official = confirmed by the broadcaster or league (their own site, schedule or press release); guide = from a Finnish streaming guide (etusuora.com), not yet confirmed. 'coverage': all = every match; selected = only some matches are shown. A competition missing from this list = no known Finnish broadcaster.",
+  "_about": "Where each competition can be watched legally in Finland. Edited by hand, checked once a season. 'confidence': official = confirmed by the broadcaster or league (their own site, schedule or press release); guide = from a Finnish streaming guide (etusuora.com), not yet confirmed. 'coverage': all = every match; selected = only some matches are shown. A competition missing from this list = no known Finnish broadcaster. Betting sites (e.g. Bet365) that stream matches are deliberately left out. Checked with no Finnish option (2026-11-17): Eredivisie, Eerste Divisie, Serie B, Greek Super League, Belgian Pro League, Swiss Super League, Scottish Premiership, USL Championship.",
   "season": "2026-27",
 
   "finland_national_team": {
@@ -73,6 +73,11 @@
     "uefa.europa.conf": {
       "service": "Viaplay", "free": false, "coverage": "all", "note": null,
       "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
+    },
+    "esp.2": {
+      "service": "MTV Katsomo+", "free": false, "coverage": "selected", "note": "Selected LaLiga 2 matches, English commentary. Shown in 2025-26; 2026-27 not confirmed on MTV's own site",
+      "checked": "2026-11-17", "confidence": "guide",
+      "source": "https://www.livesoccertv.com/competitions/spain/segunda-division/watch/finland/"
     },
     "uefa.nations": {
       "service": "MTV Katsomo+", "free": false, "coverage": "selected", "note": "Finland's own matches are free on Yle",
