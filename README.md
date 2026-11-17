@@ -1,4 +1,4 @@
-# Suomalaiset tänään — Finns Today
+# Finn to Win
 
 A website that shows which Finnish footballers play abroad on a given day,
 and where each match can be streamed legally in Finland.
