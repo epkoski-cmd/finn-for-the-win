@@ -3,8 +3,8 @@ find_finns.py — finds matches with Finnish players and saves them to a file.
 
 Run it from the Terminal, inside the finns-today folder:
 
-    python3 find_finns.py               # today, plus 3 days either side
-    python3 find_finns.py 2026-11-08    # around a chosen date, for testing
+    python3 find_finns.py               # 3 days back to 7 days ahead of today
+    python3 find_finns.py 2026-11-08    # the same, around a chosen date (for testing)
 
 What it does, step by step:
   1. Make a list of Finnish players: look through every squad in our leagues
@@ -58,7 +58,8 @@ NATIONAL_TEAM_COMPS = [
 ]
 FINLAND_TEAM_ID = "458"
 
-DAYS_AROUND = 3            # how many days before and after the chosen date
+DAYS_BEFORE = 3            # how many past days to include (for final scores)
+DAYS_AFTER = 7             # how many days ahead to include (upcoming matches)
 PLAYER_LIST_MAX_AGE = 7    # days before the Finnish player list is rebuilt
 PARALLEL_REQUESTS = 6      # how many requests to ESPN we make at the same time
 
@@ -229,7 +230,7 @@ def main():
         center = date.fromisoformat(sys.argv[1])
     else:
         center = finnish_time(datetime.now(timezone.utc)).date()
-    days = [center + timedelta(days=n) for n in range(-DAYS_AROUND, DAYS_AROUND + 1)]
+    days = [center + timedelta(days=n) for n in range(-DAYS_BEFORE, DAYS_AFTER + 1)]
 
     players = load_finnish_players()
     matches = find_matches(players, days)

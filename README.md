@@ -30,8 +30,8 @@ This is called **caching**: do the slow work once, hand everyone the result.
 Open the Terminal, go to this folder, and run:
 
 ```
-python3 find_finns.py               # today, plus 3 days either side
-python3 find_finns.py 2026-11-08    # around a chosen date (for testing)
+python3 find_finns.py               # 3 days back to 7 days ahead of today
+python3 find_finns.py 2026-11-08    # the same, around a chosen date (for testing)
 ```
 
 The first run takes about a minute and a half, because it checks every squad.

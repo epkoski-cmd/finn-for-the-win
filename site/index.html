@@ -111,6 +111,7 @@ details.squad summary { cursor: pointer; color: var(--accent); font-weight: 500;
 details.squad .finns { margin-top: 6px; }
 
 .foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
+.lineup-note { margin: 0; font-size: 0.82rem; color: var(--muted); font-style: italic; }
 .watch { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; font-size: 0.9rem; min-width: 0; }
 .watch .label { color: var(--muted); }
 .watch .svc { font-weight: 600; }
@@ -302,12 +303,15 @@ function matchCard(m) {
       details.append(ul);
       body.append(details);
     } else {
-      body.append(el("div", "club", "Lineup appears about an hour before kickoff."));
+      body.append(el("p", "lineup-note", "Lineup not confirmed yet. Lineups are usually announced about an hour before kickoff."));
     }
   } else {
     const ul = el("ul", "finns");
     for (const side of [m.home, m.away]) side.finns.forEach(f => ul.append(finnItem(f, side.name)));
     body.append(ul);
+    if (!played) {
+      body.append(el("p", "lineup-note", "Lineup not confirmed yet. These Finns are in the club's squad, but may not play."));
+    }
   }
 
   // Where to watch + report button
