@@ -115,6 +115,8 @@ details.squad .finns { margin-top: 6px; }
 .watch { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; font-size: 0.9rem; min-width: 0; }
 .watch .label { color: var(--muted); }
 .watch .svc { font-weight: 600; }
+.watch a.svc { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.watch a.svc:hover { text-decoration-thickness: 2px; }
 .watch .free { font-size: 0.72rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--good-soft); color: var(--good); }
 .watch .unsure { font-size: 0.72rem; color: var(--warn); }
 .watch.none .svc { font-weight: 400; color: var(--muted); }
@@ -321,7 +323,16 @@ function matchCard(m) {
   const watch = el("div", "watch" + (m.watch ? "" : " none"));
   watch.append(el("span", "label", "Watch:"));
   if (m.watch) {
-    watch.append(el("span", "svc", m.watch.service));
+    // Confirmed services become a link to that league's page on the service.
+    if (m.watch.url && m.watch.confidence === "official") {
+      const link = el("a", "svc", m.watch.service + " ↗");
+      link.href = m.watch.url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      watch.append(link);
+    } else {
+      watch.append(el("span", "svc", m.watch.service));
+    }
     if (m.watch.free) watch.append(el("span", "free", "Free"));
     if (m.watch.coverage === "selected") watch.append(el("span", "unsure", "selected matches only"));
     if (m.watch.confidence !== "official") watch.append(el("span", "unsure", "unconfirmed"));
