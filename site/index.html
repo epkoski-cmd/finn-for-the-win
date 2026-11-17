@@ -190,7 +190,9 @@ function todayInFinland() {
 
 async function loadData() {
   try {
-    const response = await fetch("data/matches.json");
+    // "no-cache" = always ask the server whether a newer file exists,
+    // instead of reusing the browser's saved copy for up to 10 minutes.
+    const response = await fetch("data/matches.json", { cache: "no-cache" });
     if (!response.ok) throw new Error("HTTP " + response.status);
     data = await response.json();
   } catch (err) {
