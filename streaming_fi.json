@@ -1,62 +1,81 @@
 {
-  "_about": "Where each competition can be watched legally in Finland. Edited by hand, checked once a season. 'confidence': official = confirmed by the league or broadcaster; guide = from a Finnish streaming guide (etusuora.com), not yet confirmed officially. A competition missing from this list = no known Finnish broadcaster.",
+  "_about": "Where each competition can be watched legally in Finland. Edited by hand, checked once a season. 'confidence': official = confirmed by the broadcaster or league (their own site, schedule or press release); guide = from a Finnish streaming guide (etusuora.com), not yet confirmed. 'coverage': all = every match; selected = only some matches are shown. A competition missing from this list = no known Finnish broadcaster.",
   "season": "2026-27",
 
   "finland_national_team": {
-    "service": "Yle Areena", "free": true,
-    "note": "All Finland matches in qualifiers and the Nations League",
-    "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+    "service": "Yle Areena", "free": true, "coverage": "all",
+    "note": "Qualifiers, Nations League and friendlies, Yle's deal runs to 2028",
+    "checked": "2026-11-17", "confidence": "official", "source": "https://yle.fi/aihe/a/20-304677"
   },
 
   "competitions": {
     "esp.1": {
-      "service": "Disney+", "free": false, "note": "All 380 matches, on ESPN in Disney+",
+      "service": "Disney+", "free": false, "coverage": "all", "note": "On ESPN in Disney+, deal from 2026-27 for four seasons",
       "checked": "2026-11-17", "confidence": "official",
       "source": "https://www.laliga.com/en-GB/news/laliga-strengthens-nordic-broadcasting-strategy-with-disney-and-tv2"
     },
     "eng.1": {
-      "service": "Viaplay", "free": false, "note": "Some matches on free TV",
-      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+      "service": "Viaplay", "free": false, "coverage": "all", "note": "Needs the package that includes the Premier League",
+      "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
     },
     "eng.2": {
-      "service": "Viaplay", "free": false, "note": null,
-      "checked": "2026-11-17", "confidence": "official",
-      "source": "https://www.csimagazine.com/csi/Viaplay-secures-EFL-Championship-rights-across-Nordics.php"
+      "service": "Viaplay", "free": false, "coverage": "all", "note": null,
+      "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
+    },
+    "eng.3": {
+      "service": "Viaplay", "free": false, "coverage": "selected", "note": "About one League One match per round",
+      "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
     },
     "ger.1": {
-      "service": "Viaplay", "free": false, "note": null,
-      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+      "service": "Viaplay", "free": false, "coverage": "all", "note": null,
+      "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
+    },
+    "ger.2": {
+      "service": "Viaplay", "free": false, "coverage": "all", "note": null,
+      "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
     },
     "fra.1": {
-      "service": "Viaplay", "free": false, "note": null,
-      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+      "service": "Viaplay", "free": false, "coverage": "all", "note": null,
+      "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
+    },
+    "fra.2": {
+      "service": "Viaplay", "free": false, "coverage": "selected", "note": "A few Ligue 2 matches per round",
+      "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
+    },
+    "den.1": {
+      "service": "Viaplay", "free": false, "coverage": "selected", "note": "Several Superliga matches per round",
+      "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
     },
     "ita.1": {
-      "service": "MTV Katsomo+", "free": false, "note": "Rights for 2026-27 not confirmed",
-      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+      "service": "MTV Katsomo+", "free": false, "coverage": "all", "note": "Deal for 2026-2029",
+      "checked": "2026-11-17", "confidence": "official",
+      "source": "https://www.mtvuutiset.fi/artikkeli/serie-a-jatkuu-mtv-lla-tarjontaan-myos-uusi-jalkapallosarja/9357214"
     },
     "swe.1": {
-      "service": "MTV Katsomo+", "free": false, "note": "Two matches per round",
-      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo/allsvenskan"
+      "service": "MTV Katsomo+", "free": false, "coverage": "selected", "note": "Selected Allsvenskan matches each round",
+      "checked": "2026-11-17", "confidence": "official",
+      "source": "https://www.mtvuutiset.fi/artikkeli/serie-a-jatkuu-mtv-lla-tarjontaan-myos-uusi-jalkapallosarja/9357214"
     },
     "usa.1": {
-      "service": "Apple TV", "free": false, "note": null,
-      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+      "service": "Apple TV", "free": false, "coverage": "all", "note": "All MLS matches are included in an Apple TV subscription from 2026",
+      "checked": "2026-11-17", "confidence": "official",
+      "source": "https://www.apple.com/newsroom/2025/11/major-league-soccer-is-coming-to-apple-tv-starting-in-2026/"
     },
     "uefa.champions": {
-      "service": "MTV Katsomo+", "free": false, "note": "Some matches free on MTV3",
-      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+      "service": "MTV Katsomo+", "free": false, "coverage": "all", "note": "Deal runs to the 2027 final. Some matches free on MTV3",
+      "checked": "2026-11-17", "confidence": "official",
+      "source": "https://www.mtvuutiset.fi/artikkeli/uudistuva-mestarien-liiga-jatkaa-mtv-lla-monivuotisella-sopimuksella/8943680"
     },
     "uefa.europa": {
-      "service": "Viaplay", "free": false, "note": null,
-      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+      "service": "Viaplay", "free": false, "coverage": "all", "note": null,
+      "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
     },
     "uefa.europa.conf": {
-      "service": "Viaplay", "free": false, "note": null,
-      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+      "service": "Viaplay", "free": false, "coverage": "all", "note": null,
+      "checked": "2026-11-17", "confidence": "official", "source": "https://viaplay.fi/urheilu/jalkapallo"
     },
     "uefa.nations": {
-      "service": "MTV Katsomo+", "free": false, "note": "Finland's own matches are free on Yle",
+      "service": "MTV Katsomo+", "free": false, "coverage": "selected", "note": "Finland's own matches are free on Yle",
       "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
     }
   }

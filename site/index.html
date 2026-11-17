@@ -323,6 +323,7 @@ function matchCard(m) {
   if (m.watch) {
     watch.append(el("span", "svc", m.watch.service));
     if (m.watch.free) watch.append(el("span", "free", "Free"));
+    if (m.watch.coverage === "selected") watch.append(el("span", "unsure", "selected matches only"));
     if (m.watch.confidence !== "official") watch.append(el("span", "unsure", "unconfirmed"));
   } else {
     watch.append(el("span", "svc", "No known Finnish broadcaster"));
