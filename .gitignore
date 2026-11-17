@@ -1,0 +1,6 @@
+# Files Git should NOT track.
+# data/ is created by find_finns.py on every run, so it doesn't belong in the code history.
+data/
+site/data/
+__pycache__/
+.DS_Store

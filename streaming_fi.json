@@ -1,0 +1,63 @@
+{
+  "_about": "Where each competition can be watched legally in Finland. Edited by hand, checked once a season. 'confidence': official = confirmed by the league or broadcaster; guide = from a Finnish streaming guide (etusuora.com), not yet confirmed officially. A competition missing from this list = no known Finnish broadcaster.",
+  "season": "2026-27",
+
+  "finland_national_team": {
+    "service": "Yle Areena", "free": true,
+    "note": "All Finland matches in qualifiers and the Nations League",
+    "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+  },
+
+  "competitions": {
+    "esp.1": {
+      "service": "Disney+", "free": false, "note": "All 380 matches, on ESPN in Disney+",
+      "checked": "2026-11-17", "confidence": "official",
+      "source": "https://www.laliga.com/en-GB/news/laliga-strengthens-nordic-broadcasting-strategy-with-disney-and-tv2"
+    },
+    "eng.1": {
+      "service": "Viaplay", "free": false, "note": "Some matches on free TV",
+      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+    },
+    "eng.2": {
+      "service": "Viaplay", "free": false, "note": null,
+      "checked": "2026-11-17", "confidence": "official",
+      "source": "https://www.csimagazine.com/csi/Viaplay-secures-EFL-Championship-rights-across-Nordics.php"
+    },
+    "ger.1": {
+      "service": "Viaplay", "free": false, "note": null,
+      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+    },
+    "fra.1": {
+      "service": "Viaplay", "free": false, "note": null,
+      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+    },
+    "ita.1": {
+      "service": "MTV Katsomo+", "free": false, "note": "Rights for 2026-27 not confirmed",
+      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+    },
+    "swe.1": {
+      "service": "MTV Katsomo+", "free": false, "note": "Two matches per round",
+      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo/allsvenskan"
+    },
+    "usa.1": {
+      "service": "Apple TV", "free": false, "note": null,
+      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+    },
+    "uefa.champions": {
+      "service": "MTV Katsomo+", "free": false, "note": "Some matches free on MTV3",
+      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+    },
+    "uefa.europa": {
+      "service": "Viaplay", "free": false, "note": null,
+      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+    },
+    "uefa.europa.conf": {
+      "service": "Viaplay", "free": false, "note": null,
+      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+    },
+    "uefa.nations": {
+      "service": "MTV Katsomo+", "free": false, "note": "Finland's own matches are free on Yle",
+      "checked": "2026-11-17", "confidence": "guide", "source": "https://etusuora.com/live-stream/jalkapallo"
+    }
+  }
+}
