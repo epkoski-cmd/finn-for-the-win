@@ -196,6 +196,11 @@ def find_matches(players, finnish_days):
             else:
                 for finn in m[side]["finns"]:
                     finn["role"] = lineup.get(finn["id"], {}).get("role", "not in squad")
+            # Copy goals, assists and own goals onto each Finn who has them.
+            for finn in m[side]["finns"]:
+                for key in ("goals", "assists", "own_goals"):
+                    if key in lineup.get(finn["id"], {}):
+                        finn[key] = lineup[finn["id"]][key]
 
     with ThreadPoolExecutor(PARALLEL_REQUESTS) as pool:
         list(pool.map(add_lineups, found.values()))
@@ -260,7 +265,14 @@ def main():
         for side in ("home", "away"):
             for finn in m[side]["finns"]:
                 role = f" — {finn['role']}" if finn["role"] else ""
-                print(f"           {finn['name']} ({m[side]['name']}){role}")
+                extras = ""
+                if finn.get("goals"):
+                    extras += f", goals {' '.join(finn['goals'])}"
+                if finn.get("assists"):
+                    extras += f", assists {finn['assists']}"
+                if finn.get("own_goals"):
+                    extras += f", own goals {finn['own_goals']}"
+                print(f"           {finn['name']} ({m[side]['name']}){role}{extras}")
     print(f"\nSaved to {MATCHES_FILE}")
 
 

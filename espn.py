@@ -92,6 +92,10 @@ def match_lineups(league, match_id):
     role is one of: "started", "came on", "unused sub".
     Players not in the matchday squad at all are simply missing.
     Lineups usually appear about an hour before kickoff.
+
+    Players who scored also get "goals" (minutes, e.g. ["57'", "90'+2' pen"]),
+    and "assists" and "own_goals" (counts) when above zero. Assist data is
+    missing for some matches, so a missing assist doesn't prove there wasn't one.
     """
     data = get_json(f"{BASE_URL}{league}/summary?event={match_id}")
     players = {}
@@ -103,9 +107,24 @@ def match_lineups(league, match_id):
                 role = "came on"
             else:
                 role = "unused sub"
-            players[p["athlete"]["id"]] = {
+            player = {
                 "name": p["athlete"]["displayName"],
                 "team_id": team["team"]["id"],
                 "role": role,
             }
+            # Goal minutes come from the player's "plays" (key moments).
+            goals = []
+            for play in p.get("plays", []):
+                if play.get("didScore") and not play.get("ownGoal"):
+                    minute = play.get("clock", {}).get("displayValue", "")
+                    goals.append(minute + (" pen" if play.get("penaltyKick") else ""))
+            if goals:
+                player["goals"] = goals
+            # Assists and own goals come from the player's match statistics.
+            stats = {s.get("name"): s.get("value") for s in p.get("stats", [])}
+            for stat, key in (("goalAssists", "assists"), ("ownGoals", "own_goals")):
+                count = int(stats.get(stat) or 0)
+                if count:
+                    player[key] = count
+            players[p["athlete"]["id"]] = player
     return players

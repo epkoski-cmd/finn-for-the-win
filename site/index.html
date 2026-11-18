@@ -102,19 +102,26 @@ h1 .cross { color: var(--accent); }
 }
 .score.vs { font-size: 1rem; font-weight: 500; color: var(--muted); background: none; }
 
-.finns { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
-.finn { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.finns { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+/* Each player: the star on the left, everything else wraps beside it */
+.finn { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 6px; }
+.finn .info { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; min-width: 0; }
 .finn .name { font-weight: 500; }
 .finn .club { color: var(--muted); font-size: 0.85rem; }
 .role { font-size: 0.72rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
 .role.started { background: var(--good-soft); color: var(--good); }
 .role.came-on { background: var(--accent-soft); color: var(--accent); }
 .role.unused-sub, .role.not-in-squad { background: var(--quiet-soft); color: var(--muted); }
+/* Goals and assists */
+.stat { font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.stat.goal { color: var(--fg); }
+.stat.assist { color: var(--accent); }
+.stat.own { color: var(--muted); font-weight: 500; }
 
 /* Favourite players: a star button before each name */
 .star {
-  background: none; border: 0; padding: 0 2px; margin: 0; font: inherit; font-size: 1.05rem; line-height: 1;
-  color: var(--muted); cursor: pointer; align-self: center; min-width: 24px; min-height: 24px;
+  background: none; border: 0; padding: 0 2px; margin: 0; font: inherit; font-size: 1.05rem; line-height: 1.3;
+  color: var(--muted); cursor: pointer; min-width: 24px;
 }
 .star[aria-pressed="true"] { color: var(--gold); }
 .star:hover { color: var(--gold); }
@@ -191,7 +198,7 @@ footer p { margin: 0; }
 
   <footer>
     <p id="updated"></p>
-    <p>Times are Finnish time. Match data from public sports data feeds, and it may contain errors. Streaming info is checked by hand. Visits are counted anonymously, with no cookies.</p>
+    <p>Times are Finnish time. Match data from public sports data feeds, and it may contain errors. Assists may be missing for some matches. Streaming info is checked by hand. Visits are counted anonymously, with no cookies.</p>
     <p><a class="link-btn" id="general-report" target="_blank" rel="noopener">Spotted an error? Tell us</a></p>
   </footer>
 </div>
@@ -304,9 +311,22 @@ function renderMatches() {
 
 function finnItem(finn, clubName) {
   const li = el("li", "finn" + (isFavourite(finn.id) ? " is-fav" : ""));
-  li.append(starButton(finn), el("span", "name", finn.name));
-  if (clubName) li.append(el("span", "club", clubName));
-  if (finn.role) li.append(el("span", "role " + finn.role.replace(/ /g, "-"), ROLE_LABELS[finn.role] || finn.role));
+  const info = el("span", "info");
+  li.append(starButton(finn), info);
+  info.append(el("span", "name", finn.name));
+  if (clubName) info.append(el("span", "club", clubName));
+  if (finn.role) info.append(el("span", "role " + finn.role.replace(/ /g, "-"), ROLE_LABELS[finn.role] || finn.role));
+  // Goals with their minutes, e.g. "⚽ 2 goals 36', 42'"
+  if (finn.goals) {
+    const n = finn.goals.length;
+    info.append(el("span", "stat goal", "⚽ " + (n === 1 ? "Goal " : n + " goals ") + finn.goals.join(", ")));
+  }
+  if (finn.assists) {
+    info.append(el("span", "stat assist", "🅰️ " + (finn.assists === 1 ? "Assist" : finn.assists + " assists")));
+  }
+  if (finn.own_goals) {
+    info.append(el("span", "stat own", finn.own_goals === 1 ? "Own goal" : finn.own_goals + " own goals"));
+  }
   return li;
 }
 
@@ -333,7 +353,9 @@ function matchCard(m) {
     if (side.finns.length) {
       const details = el("details", "squad");
       details.open = side.finns.some(f => isFavourite(f.id));
-      details.append(el("summary", null, side.finns.length + " Finns played"));
+      const goals = side.finns.reduce((n, f) => n + (f.goals ? f.goals.length : 0), 0);
+      details.append(el("summary", null, side.finns.length + " Finns played" +
+        (goals ? " · ⚽ " + goals + (goals === 1 ? " goal" : " goals") : "")));
       const ul = el("ul", "finns");
       side.finns.forEach(f => ul.append(finnItem(f)));
       details.append(ul);
