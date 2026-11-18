@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>This week · Finn for the Win</title>
+<meta name="description" content="How the Finnish footballers abroad did over the last 7 days.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+/* Only for this page; everything else comes from style.css */
+.period { margin: 0; color: var(--muted); }
+.period strong { color: var(--fg); }
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 0; }
+.tile .num { font-family: var(--display); font-weight: 700; font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile .lbl { font-size: 0.78rem; color: var(--muted); }
+@media (max-width: 480px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+.block { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px 14px; display: grid; gap: 10px; }
+.block h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 1.25rem; line-height: 1.2; }
+.block .note { margin: 0; font-size: 0.85rem; color: var(--muted); }
+.block.nt { border-color: var(--accent); }
+.results { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.results li { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+.results .res { font-weight: 600; }
+.results .when { font-size: 0.82rem; color: var(--muted); }
+.detail { font-size: 0.82rem; color: var(--muted); flex-basis: 100%; }
+.count-pill { font-size: 0.78rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--quiet-soft); white-space: nowrap; }
+</style>
+</head>
+<body data-title="weekPageTitle">
+
+<div class="wrap">
+  <header>
+    <div class="top">
+      <h1><a href="./">Finn <span class="cross">FTW</span></a></h1>
+      <div class="lang" id="lang" role="group"></div>
+    </div>
+    <p class="tagline"><strong>Finn for the Win.</strong> <span data-t="tagline">Finnish footballers playing abroad today, and where to watch them in Finland.</span></p>
+    <nav class="pages" data-t-label="navLabel"><a href="./" data-t="navMatches">Matches</a><a href="week.html" aria-current="page" data-t="navWeek">This week</a><a href="finns.html" data-t="navFinns">All Finns</a></nav>
+  </header>
+
+  <p class="period" id="period" data-t="loadingWeek">Loading…</p>
+  <div class="tiles" id="tiles"></div>
+  <div id="sections" class="list"></div>
+
+  <footer>
+    <p id="updated"></p>
+    <p data-t="weekFooter">Counts finished matches from the last 7 days. Assists may be missing for some matches.</p>
+    <p><a class="link-btn" id="report" target="_blank" rel="noopener" data-t="reportGeneral">Spotted an error? Tell us</a></p>
+  </footer>
+</div>
+
+<script src="texts.js"></script>
+<script src="shared.js"></script>
+<script>
+// ---------------------------------------------------------------------------
+// This page reads history.json: every finished match with Finns from the
+// last two weeks, kept up to date by find_finns.py. Here we take the last
+// 7 days and add the numbers up per player.
+// ---------------------------------------------------------------------------
+const WEEK_DAYS = 7;
+let history = null;
+let clubs = new Map();   // player ID -> club, from the "All Finns" list
+
+async function loadData() {
+  try {
+    const [h, p] = await Promise.all([
+      fetch("data/history.json", { cache: "no-cache" }).then(r => { if (!r.ok) throw r; return r.json(); }),
+      fetch("data/players.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : { leagues: [] }),
+    ]);
+    history = h;
+    for (const league of p.leagues) for (const pl of league.players) clubs.set(pl.id, pl.club);
+  } catch (err) {
+    document.getElementById("period").textContent = t("weekError");
+    return;
+  }
+  render();
+}
+
+// "2026-11-18" -> the date that many days earlier, in the same format.
+function daysBefore(isoDay, n) {
+  const d = new Date(isoDay + "T12:00:00Z");
+  d.setUTCDate(d.getUTCDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+function shortDate(isoDay) {
+  const d = new Date(isoDay + "T12:00:00");
+  return weekdayName(d) + " " + d.getDate() + "." + (d.getMonth() + 1) + ".";
+}
+function resultText(m) {
+  return m.home.name + " " + m.home.score + "–" + m.away.score + " " + m.away.name;
+}
+
+// Add up the week, player by player.
+function summarise(matches) {
+  const players = new Map();
+  for (const m of matches) {
+    for (const side of [m.home, m.away]) {
+      for (const f of side.finns) {
+        if (!players.has(f.id)) {
+          players.set(f.id, { id: f.id, name: f.name, club: null, started: 0, cameOn: 0,
+                              bench: 0, notInSquad: 0, goals: [], assists: [] });
+        }
+        const p = players.get(f.id);
+        if (!m.national_team) p.club = side.name;   // the club they played for this week
+        if (f.role === "started") p.started++;
+        else if (f.role === "came on") p.cameOn++;
+        else if (f.role === "unused sub") p.bench++;
+        else if (f.role === "not in squad") p.notInSquad++;
+        if (f.goals) p.goals.push({ n: f.goals.length, match: m });
+        if (f.assists) p.assists.push({ n: f.assists, match: m });
+      }
+    }
+  }
+  // Players seen only in national team matches: use their club from the
+  // player list, or "Finland national team" if we don't follow their club.
+  for (const p of players.values()) if (!p.club) p.club = clubs.get(p.id) || t("nationalTeam");
+  return [...players.values()];
+}
+
+function playerRow(p, extras, detail) {
+  const li = el("li", "finn" + (isFavourite(p.id) ? " is-fav" : ""));
+  const info = el("span", "info");
+  li.append(starButton(p.id, p.name), info);
+  info.append(el("span", "name", p.name), el("span", "club", p.club), ...extras);
+  if (detail) info.append(el("span", "detail", detail));
+  return li;
+}
+
+function block(title, rows, note, extraClass) {
+  const box = el("section", "block" + (extraClass ? " " + extraClass : ""));
+  box.append(el("h2", null, title));
+  if (note) box.append(el("p", "note", note));
+  const ul = el("ul", "finns");
+  rows.forEach(r => ul.append(r));
+  box.append(ul);
+  return box;
+}
+
+const total = list => list.reduce((n, x) => n + x.n, 0);
+const byName = (a, b) => a.name.localeCompare(b.name, "fi");
+
+function render() {
+  if (!history) return;
+  const today = todayInFinland();
+  const from = daysBefore(today, WEEK_DAYS - 1);   // today and the 6 days before it
+  const matches = history.matches.filter(m => m.date_fi >= from && m.date_fi <= today);
+  const players = summarise(matches);
+
+  document.getElementById("period").replaceChildren(
+    t("weekPeriod"), el("strong", null, shortDate(from) + " – " + shortDate(today)));
+  document.getElementById("updated").textContent = updatedText(history.generated);
+
+  const played = players.filter(p => p.started + p.cameOn > 0);
+  const goals = players.reduce((n, p) => n + total(p.goals), 0);
+  const assists = players.reduce((n, p) => n + total(p.assists), 0);
+  const tiles = document.getElementById("tiles");
+  tiles.replaceChildren();
+  for (const [num, label] of [[played.length, t("tilePlayed")], [goals, t("tileGoals")],
+                              [assists, t("tileAssists")], [matches.length, t("tileMatches")]]) {
+    const tile = el("div", "tile");
+    tile.append(el("span", "num", String(num)), el("span", "lbl", label));
+    tiles.append(tile);
+  }
+
+  const sections = document.getElementById("sections");
+  sections.replaceChildren();
+  if (!matches.length) {
+    const empty = el("div", "empty");
+    empty.append(el("strong", null, t("weekEmptyTitle")), t("weekEmptyText"));
+    sections.append(empty);
+    return;
+  }
+
+  // Finland's own results
+  const nt = matches.filter(m => m.national_team);
+  if (nt.length) {
+    const box = el("section", "block nt");
+    box.append(el("h2", null, t("weekFinland")));
+    const ul = el("ul", "results");
+    for (const m of nt) {
+      const li = el("li");
+      li.append(el("span", "res", resultText(m)), el("span", "when", m.league_name + " · " + shortDate(m.date_fi)));
+      ul.append(li);
+    }
+    box.append(ul);
+    sections.append(box);
+  }
+
+  // Goals and assists, most first
+  const scorers = players.filter(p => p.goals.length).sort((a, b) => total(b.goals) - total(a.goals) || byName(a, b));
+  if (scorers.length) {
+    sections.append(block(t("weekGoals"), scorers.map(p => playerRow(p,
+      [el("span", "count-pill", "⚽ " + total(p.goals))],
+      p.goals.map(g => resultText(g.match) + ", " + shortDate(g.match.date_fi)).join(" · ")))));
+  }
+  const assisters = players.filter(p => p.assists.length).sort((a, b) => total(b.assists) - total(a.assists) || byName(a, b));
+  if (assisters.length) {
+    sections.append(block(t("weekAssists"), assisters.map(p => playerRow(p,
+      [el("span", "count-pill", "🅰️ " + total(p.assists))],
+      p.assists.map(a => resultText(a.match) + ", " + shortDate(a.match.date_fi)).join(" · ")))));
+  }
+
+  // Everyone who played, most appearances first
+  played.sort((a, b) => (b.started + b.cameOn) - (a.started + a.cameOn) || b.started - a.started || byName(a, b));
+  sections.append(block(t("weekPlayed"), played.map(p => {
+    const pills = [];
+    if (p.started) pills.push(el("span", "role started", t("roles")["started"] + (p.started > 1 ? " " + p.started + "×" : "")));
+    if (p.cameOn) pills.push(el("span", "role came-on", t("roles")["came on"] + (p.cameOn > 1 ? " " + p.cameOn + "×" : "")));
+    return playerRow(p, pills);
+  })));
+
+  // Finns whose team played, but who didn't get on the pitch all week
+  const unused = players.filter(p => p.started + p.cameOn === 0).sort(byName);
+  if (unused.length) {
+    sections.append(block(t("weekDidntPlay"), unused.map(p => {
+      const pills = [];
+      if (p.bench) pills.push(el("span", "role unused-sub", t("roles")["unused sub"] + (p.bench > 1 ? " " + p.bench + "×" : "")));
+      if (p.notInSquad) pills.push(el("span", "role not-in-squad", t("roles")["not in squad"] + (p.notInSquad > 1 ? " " + p.notInSquad + "×" : "")));
+      return playerRow(p, pills);
+    }), t("weekDidntPlayNote")));
+  }
+}
+
+function redraw() {
+  document.getElementById("report").href = reportFormUrl(t("reportWeekForm"));
+  render();
+}
+setUpLanguageSwitch(redraw);
+redraw();
+loadData();
+</script>
+<!-- Visit counter (GoatCounter): counts page views, no cookies -->
+<script data-goatcounter="https://finnftw.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

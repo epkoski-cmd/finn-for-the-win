@@ -25,7 +25,9 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `data/finnish_players.json` | The saved list of Finnish players (rebuilt automatically once a week). |
 | `data/matches.json` | The result: matches with Finns, which the website will read. |
 | `data/players.json` | Every Finn we follow, grouped by league, for the website's "All Finns" page. |
+| `data/history.json` | Finished matches from the last two weeks, for the weekly summary. Kept on the live site between runs. |
 | `site/index.html` | The main page: matches by day. |
+| `site/week.html` | The "This week" page: goals, assists and who played in the last 7 days. |
 | `site/finns.html` | The "All Finns" page: every followed player, with a search box. |
 | `site/style.css` | The look of both pages (colours, fonts, layout). |
 | `site/shared.js` | Code both pages use: language switch, favourite players, calendar files and the error-report link. |

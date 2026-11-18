@@ -48,6 +48,14 @@ jobs:
           key: finnish-players-${{ github.run_id }}
           restore-keys: finnish-players-
 
+      # The match history (for the weekly summary) is kept on the live site
+      # itself: download the published copy, and the script adds to it.
+      # If it doesn't exist yet, carry on without it (the script then fills in the week).
+      - name: Download the match history from the live site
+        run: |
+          mkdir -p data
+          curl -fsSL https://epkoski-cmd.github.io/finn-for-the-win/data/history.json -o data/history.json || rm -f data/history.json
+
       - name: Find the Finns' matches
         run: python find_finns.py
 
@@ -56,6 +64,7 @@ jobs:
           mkdir -p site/data
           cp data/matches.json site/data/matches.json
           cp data/players.json site/data/players.json
+          cp data/history.json site/data/history.json
 
       - name: Package the site
         uses: actions/upload-pages-artifact@v3

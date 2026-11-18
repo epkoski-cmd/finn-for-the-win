@@ -15,6 +15,9 @@ What it does, step by step:
   3. For matches that have started or finished, check the lineups:
      did each Finn start, come on as a sub, or stay on the bench?
   4. Save the result as data/matches.json, which the website will read later.
+  5. Add finished matches to data/history.json, which the website's weekly
+     summary reads. The history survives between runs: before each run, the
+     automatic GitHub job downloads the published copy from the live site.
 """
 
 import json
@@ -68,6 +71,9 @@ STREAMING_FILE = Path(__file__).parent / "streaming_fi.json"   # edited by hand
 PLAYERS_FILE = DATA_DIR / "finnish_players.json"
 MATCHES_FILE = DATA_DIR / "matches.json"
 PLAYERS_PAGE_FILE = DATA_DIR / "players.json"   # read by the website's "All Finns" page
+HISTORY_FILE = DATA_DIR / "history.json"         # finished matches, for the weekly summary
+HISTORY_DAYS = 7           # the weekly summary covers this many past days
+HISTORY_KEEP = 14          # days of history kept in the file (older ones are dropped)
 
 
 # ---------------------------------------------------------------------------
@@ -249,6 +255,37 @@ def save_player_page_data(players):
 
 
 # ---------------------------------------------------------------------------
+# Step 5: the match history, for the weekly summary
+# ---------------------------------------------------------------------------
+
+def load_history():
+    """The saved history, or an empty one. "days_covered" lists the past days
+    whose matches are already in it, so we know which days still need fetching."""
+    if HISTORY_FILE.exists():
+        try:
+            return json.loads(HISTORY_FILE.read_text())
+        except ValueError:
+            pass   # a damaged file: start again
+    return {"days_covered": [], "matches": []}
+
+
+def update_history(history, matches, fetched_days, today):
+    """Add finished matches, mark fully past days as covered, drop old ones."""
+    by_id = {m["id"]: m for m in history["matches"]}
+    for m in matches:
+        if m["state"] == "post":
+            by_id[m["id"]] = {k: m[k] for k in (
+                "id", "league", "league_name", "national_team", "date_fi", "kickoff_fi", "home", "away")}
+    covered = set(history["days_covered"]) | {d.isoformat() for d in fetched_days if d < today}
+    oldest = (today - timedelta(days=HISTORY_KEEP)).isoformat()
+    history["days_covered"] = sorted(d for d in covered if d >= oldest)
+    history["matches"] = sorted((m for m in by_id.values() if m["date_fi"] >= oldest),
+                                key=lambda m: (m["date_fi"], m["kickoff_fi"]))
+    history["generated"] = datetime.now(timezone.utc).isoformat()
+    HISTORY_FILE.write_text(json.dumps(history, ensure_ascii=False, indent=2))
+
+
+# ---------------------------------------------------------------------------
 # Putting it together
 # ---------------------------------------------------------------------------
 
@@ -260,7 +297,20 @@ def main():
     days = [center + timedelta(days=n) for n in range(-DAYS_BEFORE, DAYS_AFTER + 1)]
 
     players = load_finnish_players()
-    matches = find_matches(players, days)
+
+    # Past days missing from the history (e.g. on the very first run) are
+    # fetched too, so the weekly summary is complete. Normally none are.
+    history = load_history()
+    missing = [center - timedelta(days=n) for n in range(1, HISTORY_DAYS + 1)
+               if (center - timedelta(days=n)).isoformat() not in history["days_covered"]]
+    start = min([days[0]] + missing)
+    fetch_days = [start + timedelta(days=n) for n in range((days[-1] - start).days + 1)]
+    if missing:
+        print(f"Also fetching {len(missing)} past day(s) for the weekly summary.")
+
+    fetched = find_matches(players, fetch_days)
+    window = {d.isoformat() for d in days}
+    matches = [m for m in fetched if m["date_fi"] in window]
     add_streaming_info(matches)
 
     DATA_DIR.mkdir(exist_ok=True)
@@ -270,6 +320,7 @@ def main():
          "matches": matches},
         ensure_ascii=False, indent=2))
     save_player_page_data(players)
+    update_history(history, fetched, fetch_days, center)
 
     # Print a readable summary in the Terminal.
     print(f"\n{len(matches)} matches with Finns, {days[0]} to {days[-1]} (Finnish time):")
