@@ -8,6 +8,79 @@ function el(tag, className, text) {
   return node;
 }
 
+// ---------------------------------------------------------------------------
+// Language.
+//   All texts live in texts.js. The site starts in Finnish if the visitor's
+//   phone or browser is set to Finnish, otherwise in English. A choice made
+//   with the FI / EN switch is remembered on the device, like favourites.
+// ---------------------------------------------------------------------------
+const LANGUAGE_KEY = "finnftw-language";
+let lang = pickLanguage();
+
+function pickLanguage() {
+  try {
+    const saved = localStorage.getItem(LANGUAGE_KEY);
+    if (saved === "fi" || saved === "en") return saved;
+  } catch {}
+  const browser = navigator.languages || [navigator.language || ""];
+  return browser.some(l => l.toLowerCase().startsWith("fi")) ? "fi" : "en";
+}
+
+// t("watch") -> "Katso:"; t("matches", 5) -> "5 ottelua"
+function t(key, ...args) {
+  const text = TEXTS[lang][key];
+  return typeof text === "function" ? text(...args) : text;
+}
+
+// Fill in the texts written straight into the HTML, marked like
+// <p data-t="footer">, data-t-placeholder="search" or data-t-label="chooseDay".
+function applyStaticTexts() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-t]").forEach(n => n.textContent = t(n.dataset.t));
+  document.querySelectorAll("[data-t-placeholder]").forEach(n => n.placeholder = t(n.dataset.tPlaceholder));
+  document.querySelectorAll("[data-t-label]").forEach(n => n.setAttribute("aria-label", t(n.dataset.tLabel)));
+  if (document.body.dataset.title) document.title = t(document.body.dataset.title);
+}
+
+// The FI / EN switch. `redraw` is the page's own function that draws its content.
+function setUpLanguageSwitch(redraw) {
+  const box = document.getElementById("lang");
+  const draw = () => {
+    box.replaceChildren();
+    box.setAttribute("aria-label", t("langLabel"));
+    for (const code of ["fi", "en"]) {
+      const b = el("button", null, code.toUpperCase());
+      b.type = "button";
+      b.lang = code;
+      b.setAttribute("aria-pressed", String(code === lang));
+      b.addEventListener("click", () => {
+        lang = code;
+        try { localStorage.setItem(LANGUAGE_KEY, code); } catch {}
+        applyStaticTexts();
+        draw();
+        redraw();
+      });
+      box.append(b);
+    }
+  };
+  applyStaticTexts();
+  draw();
+}
+
+// Dates and times the local way: Finnish "la 21.11." and "19.30",
+// English "Sat 21.11." and "19:30".
+function weekdayName(date) {
+  return date.toLocaleDateString(lang === "fi" ? "fi-FI" : "en-GB", { weekday: "short" });
+}
+function clockTime(hhmm) {
+  return lang === "fi" ? hhmm.replace(":", ".") : hhmm;
+}
+function updatedText(isoTime) {
+  const time = new Date(isoTime).toLocaleString(lang === "fi" ? "fi-FI" : "en-GB",
+    { timeZone: "Europe/Helsinki", dateStyle: "short", timeStyle: "short" });
+  return t("updated", time);
+}
+
 // Today's date in Finland, whatever time zone the visitor is in.
 function todayInFinland() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Helsinki" }).format(new Date());
@@ -45,8 +118,8 @@ function setStar(btn, id, name) {
   const on = isFavourite(id);
   btn.textContent = on ? "★" : "☆";
   btn.setAttribute("aria-pressed", String(on));
-  btn.setAttribute("aria-label", (on ? "Stop following " : "Follow ") + name);
-  btn.title = on ? "Following" : "Follow this player";
+  btn.setAttribute("aria-label", on ? t("stopFollowing", name) : t("follow", name));
+  btn.title = on ? t("followingTitle") : t("followTitle");
   btn.closest(".finn")?.classList.toggle("is-fav", on);
 }
 
@@ -101,9 +174,9 @@ function icsEvent(m) {
   const finns = [m.home, m.away].flatMap(s => s.finns.map(f => f.name));
   const title = "⚽ " + m.home.name + " – " + m.away.name;
   const lines = [m.league_name];
-  if (finns.length && !m.national_team) lines.push("Finns: " + finns.join(", "));
-  if (m.watch) lines.push("Watch in Finland: " + m.watch.service + (m.watch.url ? " " + m.watch.url : ""));
-  lines.push("From Finn for the Win: " + location.origin + location.pathname.replace(/[^/]*$/, ""));
+  if (finns.length && !m.national_team) lines.push(t("calFinns") + finns.join(", "));
+  if (m.watch) lines.push(t("calWatch") + m.watch.service + (m.watch.url ? " " + m.watch.url : ""));
+  lines.push(t("calFrom") + location.origin + location.pathname.replace(/[^/]*$/, ""));
   return [
     "BEGIN:VEVENT",
     "UID:" + m.id + "@finn-for-the-win",

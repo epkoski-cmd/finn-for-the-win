@@ -28,7 +28,8 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `site/index.html` | The main page: matches by day. |
 | `site/finns.html` | The "All Finns" page: every followed player, with a search box. |
 | `site/style.css` | The look of both pages (colours, fonts, layout). |
-| `site/shared.js` | Code both pages use: favourite players and the error-report link. |
+| `site/shared.js` | Code both pages use: language switch, favourite players, calendar files and the error-report link. |
+| `site/texts.js` | Every text on the site in Finnish and English. Edit wordings here. |
 
 ## Running it
 

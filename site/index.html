@@ -10,27 +10,31 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-title="pageTitle">
 
 <div class="wrap">
   <header>
-    <h1>Finn <span class="cross">FTW</span></h1>
-    <p class="tagline"><strong>Finn for the Win.</strong> Finnish footballers playing abroad today, and where to watch them in Finland.</p>
-    <nav class="pages" aria-label="Pages"><a href="./" aria-current="page">Matches</a><a href="finns.html">All Finns</a></nav>
+    <div class="top">
+      <h1>Finn <span class="cross">FTW</span></h1>
+      <div class="lang" id="lang" role="group"></div>
+    </div>
+    <p class="tagline"><strong>Finn for the Win.</strong> <span data-t="tagline">Finnish footballers playing abroad today, and where to watch them in Finland.</span></p>
+    <nav class="pages" data-t-label="navLabel"><a href="./" aria-current="page" data-t="navMatches">Matches</a><a href="finns.html" data-t="navFinns">All Finns</a></nav>
   </header>
 
-  <nav class="days" id="days" aria-label="Choose a day"></nav>
+  <nav class="days" id="days" data-t-label="chooseDay"></nav>
   <div class="filters" id="filters"></div>
-  <p class="summary" id="summary">Loading matches…</p>
+  <p class="summary" id="summary" data-t="loadingMatches">Loading matches…</p>
   <section class="list" id="list" aria-live="polite"></section>
 
   <footer>
     <p id="updated"></p>
-    <p>Times are Finnish time. Match data from public sports data feeds, and it may contain errors. Assists may be missing for some matches. Streaming info is checked by hand. Visits are counted anonymously, with no cookies.</p>
-    <p><a class="link-btn" id="general-report" target="_blank" rel="noopener">Spotted an error? Tell us</a></p>
+    <p data-t="footer">Times are Finnish time. Match data from public sports data feeds, and it may contain errors. Assists may be missing for some matches. Streaming info is checked by hand. Visits are counted anonymously, with no cookies.</p>
+    <p><a class="link-btn" id="general-report" target="_blank" rel="noopener" data-t="reportGeneral">Spotted an error? Tell us</a></p>
   </footer>
 </div>
 
+<script src="texts.js"></script>
 <script src="shared.js"></script>
 <script>
 // ---------------------------------------------------------------------------
@@ -40,13 +44,6 @@
 let data = null;          // the contents of matches.json
 let selectedDay = null;   // e.g. "2026-11-17"
 
-const ROLE_LABELS = {
-  "started": "Started",
-  "came on": "Came on",
-  "unused sub": "On the bench",
-  "not in squad": "Not in squad",
-};
-
 async function loadData() {
   try {
     // "no-cache" = always ask the server whether a newer file exists,
@@ -55,16 +52,12 @@ async function loadData() {
     if (!response.ok) throw new Error("HTTP " + response.status);
     data = await response.json();
   } catch (err) {
-    document.getElementById("summary").textContent =
-      "The match list couldn't be loaded. Try reloading the page.";
+    document.getElementById("summary").textContent = t("matchesError");
     return;
   }
   const today = todayInFinland();
   selectedDay = data.days.includes(today) ? today : data.days[Math.floor(data.days.length / 2)];
   renderAll();
-  const generated = new Date(data.generated);
-  document.getElementById("updated").textContent =
-    "Updated " + generated.toLocaleString("fi-FI", { timeZone: "Europe/Helsinki", dateStyle: "short", timeStyle: "short" }) + ".";
 }
 
 // ---------------------------------------------------------------------------
@@ -83,12 +76,12 @@ function renderDays() {
     const button = el("button", "day");
     button.type = "button";
     button.setAttribute("aria-pressed", String(day === selectedDay));
-    const dow = day === today ? "Today" : d.toLocaleDateString("en-GB", { weekday: "short" });
+    const dow = day === today ? t("today") : weekdayName(d);
     const n = visibleMatches(day).length;
     button.append(
       el("span", "dow", dow),
       el("span", "dnum", d.getDate() + "." + (d.getMonth() + 1) + "."),
-      el("span", "count", n + (n === 1 ? " match" : " matches")),
+      el("span", "count", t("matches", n)),
     );
     button.addEventListener("click", () => {
       selectedDay = day;
@@ -108,17 +101,15 @@ function renderMatches() {
   const summary = document.getElementById("summary");
   summary.replaceChildren();
   if (matches.length) {
-    summary.append(el("strong", null, matches.length + (matches.length === 1 ? " match" : " matches")),
-      " with Finnish players" + (finnCount ? " · " + finnCount + (finnCount === 1 ? " Finn" : " Finns") : ""));
+    summary.append(el("strong", null, t("matches", matches.length)),
+      t("withFinns") + (finnCount ? " · " + t("finns", finnCount) : ""));
   } else {
     summary.textContent = "";
     const empty = el("div", "empty");
     if (onlyFavourites) {
-      empty.append(el("strong", null, "None of your players this day"),
-        "Pick another day above, or switch to All Finns.");
+      empty.append(el("strong", null, t("noFavouritesTitle")), t("noFavouritesText"));
     } else {
-      empty.append(el("strong", null, "No Finns playing this day"),
-        "Pick another day above. International breaks and winter pauses leave some days empty.");
+      empty.append(el("strong", null, t("emptyTitle")), t("emptyText"));
     }
     list.append(empty);
     return;
@@ -132,17 +123,17 @@ function finnItem(finn, clubName) {
   li.append(starButton(finn.id, finn.name, favouritesChanged), info);
   info.append(el("span", "name", finn.name));
   if (clubName) info.append(el("span", "club", clubName));
-  if (finn.role) info.append(el("span", "role " + finn.role.replace(/ /g, "-"), ROLE_LABELS[finn.role] || finn.role));
+  if (finn.role) info.append(el("span", "role " + finn.role.replace(/ /g, "-"), t("roles")[finn.role] || finn.role));
   // Goals with their minutes, e.g. "⚽ 2 goals 36', 42'"
   if (finn.goals) {
     const n = finn.goals.length;
-    info.append(el("span", "stat goal", "⚽ " + (n === 1 ? "Goal " : n + " goals ") + finn.goals.join(", ")));
+    info.append(el("span", "stat goal", t("goals", n, finn.goals.join(", "))));
   }
   if (finn.assists) {
-    info.append(el("span", "stat assist", "🅰️ " + (finn.assists === 1 ? "Assist" : finn.assists + " assists")));
+    info.append(el("span", "stat assist", t("assists", finn.assists)));
   }
   if (finn.own_goals) {
-    info.append(el("span", "stat own", finn.own_goals === 1 ? "Own goal" : finn.own_goals + " own goals"));
+    info.append(el("span", "stat own", t("ownGoals", finn.own_goals)));
   }
   return li;
 }
@@ -150,12 +141,12 @@ function finnItem(finn, clubName) {
 function matchCard(m) {
   const card = el("article", "match" + (m.national_team ? " nt" : "") + (hasFavourite(m) ? " fav" : ""));
   card.match = m;   // remembered so the gold edge can be updated without redrawing
-  card.append(el("div", "time", m.kickoff_fi));
+  card.append(el("div", "time", clockTime(m.kickoff_fi)));
   const body = el("div", "body");
 
   // Competition + teams + score
   const comp = el("div", m.national_team ? "nt-flag" : "comp",
-    m.national_team ? "Finland national team · " + m.league_name : m.league_name);
+    m.national_team ? t("nationalTeam") + " · " + m.league_name : m.league_name);
   const teams = el("div", "teams");
   const home = el("div", "team home" + (m.home.finns.length ? " finnish" : ""), m.home.name);
   const away = el("div", "team away" + (m.away.finns.length ? " finnish" : ""), m.away.name);
@@ -171,28 +162,27 @@ function matchCard(m) {
       const details = el("details", "squad");
       details.open = side.finns.some(f => isFavourite(f.id));
       const goals = side.finns.reduce((n, f) => n + (f.goals ? f.goals.length : 0), 0);
-      details.append(el("summary", null, side.finns.length + " Finns played" +
-        (goals ? " · ⚽ " + goals + (goals === 1 ? " goal" : " goals") : "")));
+      details.append(el("summary", null, t("finnsPlayed", side.finns.length, goals)));
       const ul = el("ul", "finns");
       side.finns.forEach(f => ul.append(finnItem(f)));
       details.append(ul);
       body.append(details);
     } else {
-      body.append(el("p", "lineup-note", "Lineup not confirmed yet. Lineups are usually announced about an hour before kickoff."));
+      body.append(el("p", "lineup-note", t("ntLineupNote")));
     }
   } else {
     const ul = el("ul", "finns");
     for (const side of [m.home, m.away]) side.finns.forEach(f => ul.append(finnItem(f, side.name)));
     body.append(ul);
     if (!played) {
-      body.append(el("p", "lineup-note", "Lineup not confirmed yet. These Finns are in the club's squad, but may not play."));
+      body.append(el("p", "lineup-note", t("clubLineupNote")));
     }
   }
 
   // Where to watch + report button
   const foot = el("div", "foot");
   const watch = el("div", "watch" + (m.watch ? "" : " none"));
-  watch.append(el("span", "label", "Watch:"));
+  watch.append(el("span", "label", t("watch")));
   if (m.watch) {
     // Confirmed services become a link to that league's page on the service.
     if (m.watch.url && m.watch.confidence === "official") {
@@ -204,19 +194,19 @@ function matchCard(m) {
     } else {
       watch.append(el("span", "svc", m.watch.service));
     }
-    if (m.watch.free) watch.append(el("span", "free", "Free"));
-    if (m.watch.coverage === "selected") watch.append(el("span", "unsure", "selected matches only"));
-    if (m.watch.confidence !== "official") watch.append(el("span", "unsure", "unconfirmed"));
+    if (m.watch.free) watch.append(el("span", "free", t("free")));
+    if (m.watch.coverage === "selected") watch.append(el("span", "unsure", t("selectedOnly")));
+    if (m.watch.confidence !== "official") watch.append(el("span", "unsure", t("unconfirmed")));
   } else {
-    watch.append(el("span", "svc", "No known Finnish broadcaster"));
+    watch.append(el("span", "svc", t("noBroadcaster")));
   }
-  const reportLink = el("a", "link-btn", "Spotted an error?");
+  const reportLink = el("a", "link-btn", t("reportMatch"));
   reportLink.href = reportUrl(m);
   reportLink.target = "_blank";
   reportLink.rel = "noopener";
   const actions = el("div", "foot-actions");
   if (m.state === "pre") {
-    const cal = el("button", "link-btn", "📅 Add to calendar");
+    const cal = el("button", "link-btn", t("addToCalendar"));
     cal.type = "button";
     cal.addEventListener("click", () => downloadCalendar([m], "finn-ftw-" + m.id + ".ics"));
     actions.append(cal);
@@ -257,27 +247,27 @@ function renderFilters() {
   box.replaceChildren();
   const ids = Object.keys(favourites);
   if (!ids.length) {
-    box.append(el("p", "hint", "Tip: tap ☆ next to a player to follow them. Your picks are saved on this device only."));
+    box.append(el("p", "hint", t("hint")));
     return;
   }
   const sw = el("div", "switch");
   sw.setAttribute("role", "group");
-  sw.setAttribute("aria-label", "Show");
-  for (const [label, value] of [["All Finns", false], ["★ My Finns", true]]) {
+  sw.setAttribute("aria-label", t("show"));
+  for (const [label, value] of [[t("allFinns"), false], [t("myFinns"), true]]) {
     const b = el("button", null, label);
     b.type = "button";
     b.setAttribute("aria-pressed", String(onlyFavourites === value));
     b.addEventListener("click", () => { onlyFavourites = value; renderAll(); });
     sw.append(b);
   }
-  const following = el("p", "following", "Following:");
+  const following = el("p", "following", t("following"));
   ids.map(id => [id, favourites[id]])
      .sort((a, b) => a[1].localeCompare(b[1], "fi"))
      .forEach(([id, name]) => {
        const chip = el("span", "chip", name);
        const x = el("button", null, "×");
        x.type = "button";
-       x.setAttribute("aria-label", "Stop following " + name);
+       x.setAttribute("aria-label", t("stopFollowing", name));
        x.addEventListener("click", () => { flipFavourite(id, name); favouritesChanged(); });
        chip.append(x);
        following.append(chip);
@@ -287,8 +277,7 @@ function renderFilters() {
   // One calendar file with every upcoming match of the followed players.
   const upcoming = data.matches.filter(m => m.state === "pre" && hasFavourite(m));
   if (upcoming.length) {
-    const cal = el("button", "link-btn", "📅 Add your players' next " +
-      (upcoming.length === 1 ? "match" : upcoming.length + " matches") + " to your calendar");
+    const cal = el("button", "link-btn", t("addAllToCalendar", upcoming.length));
     cal.type = "button";
     cal.addEventListener("click", () => downloadCalendar(upcoming, "finn-ftw-my-finns.ics"));
     box.append(cal);
@@ -296,9 +285,11 @@ function renderFilters() {
 }
 
 function renderAll() {
+  if (!data) return;   // still loading
   renderFilters();
   renderDays();
   renderMatches();
+  document.getElementById("updated").textContent = updatedText(data.generated);
 }
 
 // ---------------------------------------------------------------------------
@@ -315,6 +306,7 @@ function reportUrl(match) {
 
 document.getElementById("general-report").href = reportUrl(null);
 
+setUpLanguageSwitch(renderAll);
 loadData();
 </script>
 <!-- Visit counter (GoatCounter): counts page views, no cookies -->

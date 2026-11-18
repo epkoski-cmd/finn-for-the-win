@@ -179,3 +179,9 @@ footer p { margin: 0; }
 .pages a:hover { color: var(--fg); }
 .pages a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent); }
 h1 a { color: inherit; text-decoration: none; }
+
+/* Top row: logo on the left, FI / EN switch on the right */
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--surface); flex: 0 0 auto; margin-top: 4px; }
+.lang button { font: inherit; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; border: 0; border-radius: 999px; padding: 4px 10px; background: none; color: var(--muted); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }

@@ -29,26 +29,30 @@
 .next.soon { color: var(--accent); font-weight: 500; }
 </style>
 </head>
-<body>
+<body data-title="finnsPageTitle">
 
 <div class="wrap">
   <header>
-    <h1><a href="./">Finn <span class="cross">FTW</span></a></h1>
-    <p class="tagline"><strong>Finn for the Win.</strong> Finnish footballers playing abroad today, and where to watch them in Finland.</p>
-    <nav class="pages" aria-label="Pages"><a href="./">Matches</a><a href="finns.html" aria-current="page">All Finns</a></nav>
+    <div class="top">
+      <h1><a href="./">Finn <span class="cross">FTW</span></a></h1>
+      <div class="lang" id="lang" role="group"></div>
+    </div>
+    <p class="tagline"><strong>Finn for the Win.</strong> <span data-t="tagline">Finnish footballers playing abroad today, and where to watch them in Finland.</span></p>
+    <nav class="pages" data-t-label="navLabel"><a href="./" data-t="navMatches">Matches</a><a href="finns.html" aria-current="page" data-t="navFinns">All Finns</a></nav>
   </header>
 
-  <p class="intro" id="intro">Loading players…</p>
-  <input class="search" id="search" type="search" placeholder="Search for a player or club" aria-label="Search for a player or club" hidden>
+  <p class="intro" id="intro" data-t="loadingPlayers">Loading players…</p>
+  <input class="search" id="search" type="search" data-t-placeholder="search" data-t-label="search" hidden>
   <section class="list" id="list"></section>
 
   <footer>
     <p id="updated"></p>
-    <p>Players are found automatically from club squads, which are checked once a week. A player who just changed clubs may show at the old club for a few days.</p>
-    <p><a class="link-btn" id="report" target="_blank" rel="noopener">Is a player missing or at the wrong club? Tell us</a></p>
+    <p data-t="finnsFooter">Players are found automatically from club squads, which are checked once a week. A player who just changed clubs may show at the old club for a few days.</p>
+    <p><a class="link-btn" id="report" target="_blank" rel="noopener" data-t="reportFinns">Is a player missing or at the wrong club? Tell us</a></p>
   </footer>
 </div>
 
+<script src="texts.js"></script>
 <script src="shared.js"></script>
 <script>
 // ---------------------------------------------------------------------------
@@ -59,6 +63,7 @@
 // ---------------------------------------------------------------------------
 let leagues = [];
 let matches = [];
+let generated = null;
 
 async function loadData() {
   try {
@@ -68,17 +73,11 @@ async function loadData() {
     ]);
     leagues = p.leagues;
     matches = m.matches;
-    const updated = new Date(p.generated);
-    document.getElementById("updated").textContent =
-      "Updated " + updated.toLocaleString("fi-FI", { timeZone: "Europe/Helsinki", dateStyle: "short", timeStyle: "short" }) + ".";
+    generated = p.generated;
   } catch (err) {
-    document.getElementById("intro").textContent = "The player list couldn't be loaded. Try reloading the page.";
+    document.getElementById("intro").textContent = t("playersError");
     return;
   }
-  const total = leagues.reduce((n, l) => n + l.players.length, 0);
-  const intro = document.getElementById("intro");
-  intro.replaceChildren(el("strong", null, total + " Finnish players"),
-    " in " + leagues.length + " leagues abroad. Tap ☆ to follow a player; their matches are then marked on the main page.");
   document.getElementById("search").hidden = false;
   render();
 }
@@ -94,10 +93,10 @@ function nextMatch(playerId) {
 function nextText(m, club) {
   const today = todayInFinland();
   const d = new Date(m.date_fi + "T12:00:00");
-  const when = m.date_fi === today ? "Today " + m.kickoff_fi
-    : d.toLocaleDateString("en-GB", { weekday: "short" }) + " " + d.getDate() + "." + (d.getMonth() + 1) + ".";
+  const when = m.date_fi === today ? t("today") + " " + clockTime(m.kickoff_fi)
+    : weekdayName(d) + " " + d.getDate() + "." + (d.getMonth() + 1) + ".";
   const opponent = m.home.name === club ? m.away.name : m.home.name;
-  return { text: "Next: " + when + " vs " + opponent, soon: m.date_fi === today };
+  return { text: t("next") + " " + when + " vs " + opponent, soon: m.date_fi === today };
 }
 
 function playerItem(p) {
@@ -131,6 +130,11 @@ function matchesSearch(text, ...fields) {
 }
 
 function render() {
+  if (!generated) return;   // still loading
+  const total = leagues.reduce((n, l) => n + l.players.length, 0);
+  document.getElementById("intro").replaceChildren(el("strong", null, t("introCount", total)), t("introRest", leagues.length));
+  document.getElementById("updated").textContent = updatedText(generated);
+
   const text = document.getElementById("search").value.trim().toLowerCase();
   const list = document.getElementById("list");
   list.replaceChildren();
@@ -153,7 +157,7 @@ function render() {
   if (extra.length) {
     shown += extra.length;
     const box = el("section", "league nt-extra");
-    const h2 = el("h2", null, "Played for Finland, not followed yet");
+    const h2 = el("h2", null, t("extraTitle"));
     h2.append(el("span", "n", String(extra.length)));
     const ul = el("ul", "finns");
     for (const p of extra) {
@@ -162,28 +166,31 @@ function render() {
       li.append(starButton(p.id, p.name), info);
       info.append(el("span", "name", p.name));
       // Opens the report form with the request already written in.
-      const ask = el("a", "ask", "Ask us to follow this player ↗");
-      ask.href = reportFormUrl("Please follow " + p.name + " (played for Finland)");
+      const ask = el("a", "ask", t("askToFollow"));
+      ask.href = reportFormUrl(t("askFormText", p.name));
       ask.target = "_blank";
       ask.rel = "noopener";
       info.append(ask);
       ul.append(li);
     }
-    box.append(h2, el("p", "note",
-      "These players were in Finland's recent lineups, but their clubs are in leagues the site doesn't cover yet, so their club matches don't show up. Tap a link to ask us to add one."), ul);
+    box.append(h2, el("p", "note", t("extraNote")), ul);
     list.append(box);
   }
 
   if (!shown) {
     const empty = el("div", "empty");
-    empty.append(el("strong", null, "No match for “" + text + "”"),
-      "Try part of a name, a club or a league. If a Finn is missing, tell us with the link below.");
+    empty.append(el("strong", null, t("noResultsTitle", text)), t("noResultsText"));
     list.append(empty);
   }
 }
 
 document.getElementById("search").addEventListener("input", render);
-document.getElementById("report").href = reportFormUrl("All Finns page");
+function redraw() {
+  document.getElementById("report").href = reportFormUrl(t("reportFinnsForm"));
+  render();
+}
+setUpLanguageSwitch(redraw);
+redraw();
 loadData();
 </script>
 <!-- Visit counter (GoatCounter): counts page views, no cookies -->
