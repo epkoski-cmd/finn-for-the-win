@@ -85,6 +85,12 @@ def matches_on(league, day):
     return matches
 
 
+def league_name(league):
+    """The league's readable name, e.g. "eng.2" -> "English League Championship"."""
+    data = get_json(f"{BASE_URL}{league}/scoreboard")
+    return data["leagues"][0]["name"] if data.get("leagues") else league
+
+
 def match_lineups(league, match_id):
     """Who was in the matchday squads. Returns {player_id: {...}}, e.g.
         {"12345": {"name": "Ville Koski", "team_id": "96", "role": "started"}}

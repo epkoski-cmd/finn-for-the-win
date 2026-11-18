@@ -24,6 +24,11 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `streaming_fi.json` | Edited by hand: where each competition can be watched in Finland. Check it once a season. |
 | `data/finnish_players.json` | The saved list of Finnish players (rebuilt automatically once a week). |
 | `data/matches.json` | The result: matches with Finns, which the website will read. |
+| `data/players.json` | Every Finn we follow, grouped by league, for the website's "All Finns" page. |
+| `site/index.html` | The main page: matches by day. |
+| `site/finns.html` | The "All Finns" page: every followed player, with a search box. |
+| `site/style.css` | The look of both pages (colours, fonts, layout). |
+| `site/shared.js` | Code both pages use: favourite players and the error-report link. |
 
 ## Running it
 

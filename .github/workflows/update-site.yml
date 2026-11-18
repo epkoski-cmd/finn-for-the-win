@@ -55,6 +55,7 @@ jobs:
         run: |
           mkdir -p site/data
           cp data/matches.json site/data/matches.json
+          cp data/players.json site/data/players.json
 
       - name: Package the site
         uses: actions/upload-pages-artifact@v3

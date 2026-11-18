@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>All Finns · Finn for the Win</title>
+<meta name="description" content="Every Finnish footballer abroad that Finn for the Win follows, by league.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+/* Only for this page; everything else comes from style.css */
+.intro { margin: 0; color: var(--muted); }
+.intro strong { color: var(--fg); }
+.search {
+  width: 100%; font: inherit; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+}
+.search::placeholder { color: var(--muted); }
+.search:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.league { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px 14px; display: grid; gap: 10px; }
+.league h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 1.25rem; line-height: 1.2; display: flex; justify-content: space-between; gap: 8px; }
+.league h2 .n { color: var(--muted); font-weight: 500; font-size: 1rem; }
+.league.nt-extra { border-style: dashed; }
+.league .note { margin: 0; font-size: 0.85rem; color: var(--muted); }
+.next { font-size: 0.82rem; color: var(--muted); }
+.next.soon { color: var(--accent); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1><a href="./">Finn <span class="cross">FTW</span></a></h1>
+    <p class="tagline"><strong>Finn for the Win.</strong> Finnish footballers playing abroad today, and where to watch them in Finland.</p>
+    <nav class="pages" aria-label="Pages"><a href="./">Matches</a><a href="finns.html" aria-current="page">All Finns</a></nav>
+  </header>
+
+  <p class="intro" id="intro">Loading players…</p>
+  <input class="search" id="search" type="search" placeholder="Search for a player or club" aria-label="Search for a player or club" hidden>
+  <section class="list" id="list"></section>
+
+  <footer>
+    <p id="updated"></p>
+    <p>Players are found automatically from club squads, which are checked once a week. A player who just changed clubs may show at the old club for a few days.</p>
+    <p><a class="link-btn" id="report" target="_blank" rel="noopener">Is a player missing or at the wrong club? Tell us</a></p>
+  </footer>
+</div>
+
+<script src="shared.js"></script>
+<script>
+// ---------------------------------------------------------------------------
+// This page reads two saved files:
+//   players.json  every Finn the site follows, grouped by league
+//   matches.json  the matches shown on the main page, used here for
+//                 "Next match" and for Finland players we don't follow
+// ---------------------------------------------------------------------------
+let leagues = [];
+let matches = [];
+
+async function loadData() {
+  try {
+    const [p, m] = await Promise.all([
+      fetch("data/players.json", { cache: "no-cache" }).then(r => { if (!r.ok) throw r; return r.json(); }),
+      fetch("data/matches.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : { matches: [] }),
+    ]);
+    leagues = p.leagues;
+    matches = m.matches;
+    const updated = new Date(p.generated);
+    document.getElementById("updated").textContent =
+      "Updated " + updated.toLocaleString("fi-FI", { timeZone: "Europe/Helsinki", dateStyle: "short", timeStyle: "short" }) + ".";
+  } catch (err) {
+    document.getElementById("intro").textContent = "The player list couldn't be loaded. Try reloading the page.";
+    return;
+  }
+  const total = leagues.reduce((n, l) => n + l.players.length, 0);
+  const intro = document.getElementById("intro");
+  intro.replaceChildren(el("strong", null, total + " Finnish players"),
+    " in " + leagues.length + " leagues abroad. Tap ☆ to follow a player; their matches are then marked on the main page.");
+  document.getElementById("search").hidden = false;
+  render();
+}
+
+// The player's next match (or today's), from the main page's data.
+function nextMatch(playerId) {
+  const today = todayInFinland();
+  return matches
+    .filter(m => m.date_fi >= today && [m.home, m.away].some(s => s.finns.some(f => f.id === playerId)))
+    .sort((a, b) => (a.date_fi + a.kickoff_fi).localeCompare(b.date_fi + b.kickoff_fi))[0];
+}
+
+function nextText(m, club) {
+  const today = todayInFinland();
+  const d = new Date(m.date_fi + "T12:00:00");
+  const when = m.date_fi === today ? "Today " + m.kickoff_fi
+    : d.toLocaleDateString("en-GB", { weekday: "short" }) + " " + d.getDate() + "." + (d.getMonth() + 1) + ".";
+  const opponent = m.home.name === club ? m.away.name : m.home.name;
+  return { text: "Next: " + when + " vs " + opponent, soon: m.date_fi === today };
+}
+
+function playerItem(p) {
+  const li = el("li", "finn");
+  const info = el("span", "info");
+  li.append(starButton(p.id, p.name), info);
+  info.append(el("span", "name", p.name), el("span", "club", p.club));
+  const m = nextMatch(p.id);
+  if (m) {
+    const n = nextText(m, p.club);
+    info.append(el("span", "next" + (n.soon ? " soon" : ""), n.text));
+  }
+  return li;
+}
+
+// Players who played for Finland in a match in our data, but aren't in our
+// list, because their club is in a league the site doesn't cover yet.
+function untrackedNationalTeamPlayers() {
+  const known = new Set(leagues.flatMap(l => l.players.map(p => p.id)));
+  const found = new Map();
+  for (const m of matches.filter(m => m.national_team)) {
+    const side = m.home.id === "458" ? m.home : m.away;
+    for (const f of side.finns) if (!known.has(f.id)) found.set(f.id, f.name);
+  }
+  return [...found].map(([id, name]) => ({ id, name }))
+                   .sort((a, b) => a.name.localeCompare(b.name, "fi"));
+}
+
+function matchesSearch(text, ...fields) {
+  return !text || fields.some(f => f.toLowerCase().includes(text));
+}
+
+function render() {
+  const text = document.getElementById("search").value.trim().toLowerCase();
+  const list = document.getElementById("list");
+  list.replaceChildren();
+  let shown = 0;
+
+  for (const league of leagues) {
+    const players = league.players.filter(p => matchesSearch(text, p.name, p.club, league.name));
+    if (!players.length) continue;
+    shown += players.length;
+    const box = el("section", "league");
+    const h2 = el("h2", null, league.name);
+    h2.append(el("span", "n", String(players.length)));
+    const ul = el("ul", "finns");
+    players.forEach(p => ul.append(playerItem(p)));
+    box.append(h2, ul);
+    list.append(box);
+  }
+
+  const extra = untrackedNationalTeamPlayers().filter(p => matchesSearch(text, p.name));
+  if (extra.length) {
+    shown += extra.length;
+    const box = el("section", "league nt-extra");
+    const h2 = el("h2", null, "Played for Finland, not followed yet");
+    h2.append(el("span", "n", String(extra.length)));
+    const ul = el("ul", "finns");
+    for (const p of extra) {
+      const li = el("li", "finn");
+      const info = el("span", "info");
+      li.append(starButton(p.id, p.name), info);
+      info.append(el("span", "name", p.name));
+      ul.append(li);
+    }
+    box.append(h2, el("p", "note",
+      "These players were in Finland's recent lineups, but their clubs are in leagues the site doesn't cover yet, so their club matches don't show up."), ul);
+    list.append(box);
+  }
+
+  if (!shown) {
+    const empty = el("div", "empty");
+    empty.append(el("strong", null, "No match for “" + text + "”"),
+      "Try part of a name, a club or a league. If a Finn is missing, tell us with the link below.");
+    list.append(empty);
+  }
+}
+
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("report").href = reportFormUrl("All Finns page");
+loadData();
+</script>
+<!-- Visit counter (GoatCounter): counts page views, no cookies -->
+<script data-goatcounter="https://finnftw.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

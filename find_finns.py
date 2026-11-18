@@ -67,6 +67,7 @@ DATA_DIR = Path(__file__).parent / "data"
 STREAMING_FILE = Path(__file__).parent / "streaming_fi.json"   # edited by hand
 PLAYERS_FILE = DATA_DIR / "finnish_players.json"
 MATCHES_FILE = DATA_DIR / "matches.json"
+PLAYERS_PAGE_FILE = DATA_DIR / "players.json"   # read by the website's "All Finns" page
 
 
 # ---------------------------------------------------------------------------
@@ -226,6 +227,27 @@ def add_streaming_info(matches):
             m["watch"] = table["competitions"].get(m["league"])   # None if unknown
 
 
+def save_player_page_data(players):
+    """Save the player list for the website's "All Finns" page, grouped by
+    league in the same order as DOMESTIC_LEAGUES (England first, and so on)."""
+    codes = sorted({p["league"] for p in players},
+                   key=lambda lg: DOMESTIC_LEAGUES.index(lg) if lg in DOMESTIC_LEAGUES else 99)
+    with ThreadPoolExecutor(PARALLEL_REQUESTS) as pool:
+        names = dict(zip(codes, pool.map(espn.league_name, codes)))
+    leagues = []
+    for code in codes:
+        in_league = sorted((p for p in players if p["league"] == code),
+                           key=lambda p: (p["team_name"], p["name"]))
+        leagues.append({
+            "league": code,
+            "name": names[code],
+            "players": [{"id": p["id"], "name": p["name"], "club": p["team_name"]} for p in in_league],
+        })
+    PLAYERS_PAGE_FILE.write_text(json.dumps(
+        {"generated": datetime.now(timezone.utc).isoformat(), "leagues": leagues},
+        ensure_ascii=False, indent=2))
+
+
 # ---------------------------------------------------------------------------
 # Putting it together
 # ---------------------------------------------------------------------------
@@ -247,6 +269,7 @@ def main():
          "days": [d.isoformat() for d in days],
          "matches": matches},
         ensure_ascii=False, indent=2))
+    save_player_page_data(players)
 
     # Print a readable summary in the Terminal.
     print(f"\n{len(matches)} matches with Finns, {days[0]} to {days[-1]} (Finnish time):")
