@@ -1,5 +1,5 @@
 {
-  "_about": "Where each competition can be watched legally in Finland. Edited by hand, checked once a season. 'confidence': official = confirmed by the broadcaster or league (their own site, schedule or press release); guide = from a Finnish streaming guide (etusuora.com), not yet confirmed. 'coverage': all = every match; selected = only some matches are shown. 'url': the page to watch it (the site links it only when confidence is official). A competition missing from this list = no known Finnish broadcaster. Betting sites (e.g. Bet365) that stream matches are deliberately left out. Checked with no Finnish option (2026-11-17): Eredivisie, Eerste Divisie, Serie B, Greek Super League, Belgian Pro League, Swiss Super League, Scottish Premiership, USL Championship. LaLiga 2: MTV showed selected matches until 2025-26, but LaLiga moved to Disney+ in 2026-27 and LaLiga 2 isn't confirmed anywhere, so it's left out until confirmed.",
+  "_about": "Where each competition can be watched legally in Finland. Edited by hand, checked once a season. 'confidence': official = confirmed by the broadcaster or league (their own site, schedule or press release); guide = from a Finnish streaming guide (etusuora.com), not yet confirmed. 'coverage': all = every match; selected = only some matches are shown. 'url': the page to watch it (the site links it only when confidence is official). A competition missing from this list = no known Finnish broadcaster. Betting sites (e.g. Bet365) that stream matches are deliberately left out. Checked with no Finnish option (2026-11-17): Eredivisie, Eerste Divisie, Serie B, Greek Super League, Belgian Pro League, Swiss Super League, Scottish Premiership, USL Championship. LaLiga 2: MTV showed selected matches until 2025-26, but LaLiga moved to Disney+ in 2026-27 and LaLiga 2 isn't confirmed anywhere, so it's left out until confirmed. Women's football (checked 2026-11-18): no Finnish broadcaster confirmed for the Women's Super League (Viaplay Finland has no WSL page), Première Ligue, Liga F or Vrouwen Eredivisie.",
   "season": "2026-27",
   "finland_national_team": {
     "service": "Yle Areena",
@@ -9,6 +9,16 @@
     "checked": "2026-11-17",
     "confidence": "official",
     "source": "https://yle.fi/aihe/a/20-304677",
+    "url": "https://areena.yle.fi"
+  },
+  "finland_women_national_team": {
+    "service": "Yle Areena",
+    "free": true,
+    "coverage": "all",
+    "note": "Helmarit: World Cup and Euro qualifiers and Nations League, Yle's deal runs to 2029",
+    "checked": "2026-11-18",
+    "confidence": "official",
+    "source": "https://yle.fi/a/74-20145176",
     "url": "https://areena.yle.fi"
   },
   "competitions": {
@@ -170,6 +180,24 @@
       "checked": "2026-11-17",
       "confidence": "guide",
       "source": "https://etusuora.com/live-stream/jalkapallo"
+    },
+    "uefa.wchampions": {
+      "service": "Disney+",
+      "free": false,
+      "coverage": "all",
+      "note": "Disney+ has the rights 'across Europe' 2025/26-2029/30; Finland not named explicitly",
+      "checked": "2026-11-18",
+      "confidence": "guide",
+      "source": "https://thewaltdisneycompany.eu/disney-becomes-the-home-of-uefa-womens-champions-league-across-europe/"
+    },
+    "usa.nwsl": {
+      "service": "NWSL+",
+      "free": true,
+      "coverage": "all",
+      "note": "The league's own app, free outside the US with an email sign-up (2024-2027 deal); not confirmed for Finland",
+      "checked": "2026-11-18",
+      "confidence": "guide",
+      "source": "https://sandiegowavefc.com/nwsl-announces-global-distribution-plans-for-2025-regular-season/"
     }
   }
 }

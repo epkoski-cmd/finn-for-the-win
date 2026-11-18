@@ -20,6 +20,7 @@
     </div>
     <p class="tagline"><strong>Finn for the Win.</strong> <span data-t="tagline">Finnish footballers playing abroad today, and where to watch them in Finland.</span></p>
     <nav class="pages" data-t-label="navLabel"><a href="./" aria-current="page" data-t="navMatches">Matches</a><a href="week.html" data-t="navWeek">This week</a><a href="finns.html" data-t="navFinns">All Finns</a></nav>
+    <div class="switch gender" id="gender" role="group"></div>
   </header>
 
   <nav class="days" id="days" data-t-label="chooseDay"></nav>
@@ -64,7 +65,7 @@ async function loadData() {
 // 2. Draw the page from the data.
 // ---------------------------------------------------------------------------
 function matchesOn(day) {
-  return data.matches.filter(m => m.date_fi === day);
+  return data.matches.filter(m => m.date_fi === day && showsGender(m.women));
 }
 
 function renderDays() {
@@ -146,7 +147,9 @@ function matchCard(m) {
 
   // Competition + teams + score
   const comp = el("div", m.national_team ? "nt-flag" : "comp",
-    m.national_team ? t("nationalTeam") + " · " + m.league_name : m.league_name);
+    m.national_team ? nationalTeamName(m.women) + " · " + m.league_name : m.league_name);
+  // When men's and women's matches are mixed, women's get a small tag.
+  if (m.women && gender === "all") comp.prepend(el("span", "tag-w", t("womenTag")));
   const teams = el("div", "teams");
   const home = el("div", "team home" + (m.home.finns.length ? " finnish" : ""), m.home.name);
   const away = el("div", "team away" + (m.away.finns.length ? " finnish" : ""), m.away.name);
@@ -157,7 +160,7 @@ function matchCard(m) {
 
   // The Finns
   if (m.national_team) {
-    const side = m.home.id === "458" ? m.home : m.away;
+    const side = finlandSide(m);
     if (side.finns.length) {
       const details = el("details", "squad");
       details.open = side.finns.some(f => isFavourite(f.id));
@@ -306,7 +309,8 @@ function reportUrl(match) {
 
 document.getElementById("general-report").href = reportUrl(null);
 
-setUpLanguageSwitch(renderAll);
+const redrawGenderSwitch = setUpGenderSwitch(renderAll);
+setUpLanguageSwitch(() => { redrawGenderSwitch(); renderAll(); });
 loadData();
 </script>
 <!-- Visit counter (GoatCounter): counts page views, no cookies -->

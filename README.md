@@ -58,5 +58,9 @@ Later runs reuse the saved player list and are quicker.
 - ESPN's feeds are unofficial and could change without warning.
 - Squads are today's squads, so for old dates a player who has since moved clubs shows up wrong.
 - ESPN's data has some errors (e.g. one player listed at two clubs).
-- Not covered yet: domestic cups, women's football, and some leagues (e.g. Poland, Nordic second tiers).
+- Not covered yet: domestic cups and some leagues (e.g. Poland, Nordic second tiers).
+- Women's football: the data source has the English, Spanish, French, Dutch, US, Canadian, Australian and Mexican leagues,
+  the Women's Champions League and Helmarit, but not Sweden, Germany, Italy, Norway or Denmark, where many Finnish women play.
+- A few Finns are listed under another citizenship (e.g. Fredrik Oldrup Jensen as Norwegian). Add them to `EXTRA_FINNS`
+  in `find_finns.py`. The website's "Played for Finland, not followed yet" list shows who might be missing.
 - The streaming table is partly from a Finnish streaming guide, not official sources. Entries are marked `"confidence": "guide"` until confirmed.

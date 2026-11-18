@@ -61,6 +61,36 @@ NATIONAL_TEAM_COMPS = [
 ]
 FINLAND_TEAM_ID = "458"
 
+# Players who play for Finland but whom the data source lists under another
+# citizenship. Add a player's ID here (the number in their ESPN address) and
+# they're treated as Finnish. Tip: the website's "Played for Finland, not
+# followed yet" list shows national team players the script didn't find.
+EXTRA_FINNS = {
+    "221227": "Fredrik Oldrup Jensen",   # listed as Norway (2026-11-18)
+}
+
+# Women's football. The data source has fewer women's leagues: Sweden,
+# Germany, Italy, Norway and Denmark are missing (checked 2026-11-18).
+WOMEN_LEAGUES = [
+    "eng.w.1",                            # England: Women's Super League
+    "esp.w.1", "fra.w.1", "ned.w.1",      # Spain, France, Netherlands
+    "usa.nwsl", "usa.w.usl.1",            # USA: NWSL + USL Super League
+    "can.w.nsl", "aus.w.1", "mex.w.1",    # Canada, Australia, Mexico
+]
+WOMEN_CUPS = ["uefa.wchampions"]
+WOMEN_NATIONAL_TEAM_COMPS = [
+    "fifa.wworldq.uefa",  # World Cup qualifiers
+    "uefa.w.nations",     # Nations League
+    "uefa.weuro",         # European Championship
+    "fifa.wwc",           # World Cup
+    "fifa.friendly.w",    # Friendlies
+]
+FINLAND_WOMEN_TEAM_ID = "7536"   # Helmarit
+
+ALL_LEAGUES = DOMESTIC_LEAGUES + WOMEN_LEAGUES          # squads we scan for Finns
+WOMEN_COMPETITIONS = set(WOMEN_LEAGUES + WOMEN_CUPS + WOMEN_NATIONAL_TEAM_COMPS)
+FINLAND_TEAM_IDS = {FINLAND_TEAM_ID, FINLAND_WOMEN_TEAM_ID}
+
 DAYS_BEFORE = 3            # how many past days to include (for final scores)
 DAYS_AFTER = 7             # how many days ahead to include (upcoming matches)
 PLAYER_LIST_MAX_AGE = 7    # days before the Finnish player list is rebuilt
@@ -74,6 +104,8 @@ PLAYERS_PAGE_FILE = DATA_DIR / "players.json"   # read by the website's "All Fin
 HISTORY_FILE = DATA_DIR / "history.json"         # finished matches, for the weekly summary
 HISTORY_DAYS = 7           # the weekly summary covers this many past days
 HISTORY_KEEP = 14          # days of history kept in the file (older ones are dropped)
+HISTORY_VERSION = 2        # raise this when the history's contents change; it's then rebuilt
+                           # (2 = women's football added)
 
 
 # ---------------------------------------------------------------------------
@@ -112,14 +144,15 @@ def load_finnish_players():
     if PLAYERS_FILE.exists():
         saved = json.loads(PLAYERS_FILE.read_text())
         age = datetime.now(timezone.utc) - datetime.fromisoformat(saved["updated"])
-        if age.days < PLAYER_LIST_MAX_AGE:
+        # (A list saved before women's leagues were added is rebuilt.)
+        if age.days < PLAYER_LIST_MAX_AGE and all("women" in p for p in saved["players"]):
             print(f"Using saved list of {len(saved['players'])} Finnish players.")
             return saved["players"]
 
     print("Building the list of Finnish players (checks every squad, takes a minute)...")
     # First every team in every league...
     teams = []
-    for league in DOMESTIC_LEAGUES:
+    for league in ALL_LEAGUES:
         for team in espn.league_teams(league):
             teams.append((league, team))
 
@@ -129,8 +162,9 @@ def load_finnish_players():
         squad = espn.team_squad(league, team["id"])
         return [
             {"id": p["id"], "name": p["name"], "team_id": team["id"],
-             "team_name": team["name"], "league": league}
-            for p in squad if p["citizenship"] == "Finland"
+             "team_name": team["name"], "league": league,
+             "women": league in WOMEN_COMPETITIONS}
+            for p in squad if p["citizenship"] == "Finland" or p["id"] in EXTRA_FINNS
         ]
 
     players = []
@@ -159,7 +193,8 @@ def find_matches(players, finnish_days):
     # ESPN's days follow US time, so to cover a full Finnish day we also
     # need the US day before it (late US evening = next morning in Finland).
     espn_days = [finnish_days[0] - timedelta(days=1)] + finnish_days
-    competitions = DOMESTIC_LEAGUES + CUPS + NATIONAL_TEAM_COMPS
+    competitions = (DOMESTIC_LEAGUES + CUPS + NATIONAL_TEAM_COMPS
+                    + WOMEN_LEAGUES + WOMEN_CUPS + WOMEN_NATIONAL_TEAM_COMPS)
     requests = [(lg, d) for lg in competitions for d in espn_days]
     print(f"Checking {len(requests)} league schedules...")
 
@@ -173,7 +208,8 @@ def find_matches(players, finnish_days):
         if kickoff_fi.date() not in finnish_days:
             continue
         team_ids = (m["home"]["id"], m["away"]["id"])
-        m["national_team"] = FINLAND_TEAM_ID in team_ids
+        m["national_team"] = any(t in FINLAND_TEAM_IDS for t in team_ids)
+        m["women"] = m["league"] in WOMEN_COMPETITIONS
         if not m["national_team"] and not any(t in finns_by_team for t in team_ids):
             continue
         m["date_fi"] = kickoff_fi.strftime("%Y-%m-%d")
@@ -193,12 +229,12 @@ def find_matches(players, finnish_days):
             return
         lineup = espn.match_lineups(m["league"], m["id"])
         for side in ("home", "away"):
-            if m[side]["id"] == FINLAND_TEAM_ID:
+            if m[side]["id"] in FINLAND_TEAM_IDS:
                 # National team: list everyone who played for Finland.
                 m[side]["finns"] = [
                     {"id": pid, "name": p["name"], "role": p["role"]}
                     for pid, p in lineup.items()
-                    if p["team_id"] == FINLAND_TEAM_ID and p["role"] != "unused sub"
+                    if p["team_id"] == m[side]["id"] and p["role"] != "unused sub"
                 ]
             else:
                 for finn in m[side]["finns"]:
@@ -228,16 +264,17 @@ def add_streaming_info(matches):
     table = json.loads(STREAMING_FILE.read_text())
     for m in matches:
         if m["national_team"]:
-            m["watch"] = table["finland_national_team"]
+            key = "finland_women_national_team" if m["women"] else "finland_national_team"
+            m["watch"] = table.get(key)
         else:
             m["watch"] = table["competitions"].get(m["league"])   # None if unknown
 
 
 def save_player_page_data(players):
     """Save the player list for the website's "All Finns" page, grouped by
-    league in the same order as DOMESTIC_LEAGUES (England first, and so on)."""
+    league in the same order as ALL_LEAGUES (England first, and so on)."""
     codes = sorted({p["league"] for p in players},
-                   key=lambda lg: DOMESTIC_LEAGUES.index(lg) if lg in DOMESTIC_LEAGUES else 99)
+                   key=lambda lg: ALL_LEAGUES.index(lg) if lg in ALL_LEAGUES else 99)
     with ThreadPoolExecutor(PARALLEL_REQUESTS) as pool:
         names = dict(zip(codes, pool.map(espn.league_name, codes)))
     leagues = []
@@ -247,6 +284,7 @@ def save_player_page_data(players):
         leagues.append({
             "league": code,
             "name": names[code],
+            "women": code in WOMEN_COMPETITIONS,
             "players": [{"id": p["id"], "name": p["name"], "club": p["team_name"]} for p in in_league],
         })
     PLAYERS_PAGE_FILE.write_text(json.dumps(
@@ -263,10 +301,12 @@ def load_history():
     whose matches are already in it, so we know which days still need fetching."""
     if HISTORY_FILE.exists():
         try:
-            return json.loads(HISTORY_FILE.read_text())
+            saved = json.loads(HISTORY_FILE.read_text())
+            if saved.get("version") == HISTORY_VERSION:
+                return saved
         except ValueError:
             pass   # a damaged file: start again
-    return {"days_covered": [], "matches": []}
+    return {"version": HISTORY_VERSION, "days_covered": [], "matches": []}
 
 
 def update_history(history, matches, fetched_days, today):
@@ -275,7 +315,7 @@ def update_history(history, matches, fetched_days, today):
     for m in matches:
         if m["state"] == "post":
             by_id[m["id"]] = {k: m[k] for k in (
-                "id", "league", "league_name", "national_team", "date_fi", "kickoff_fi", "home", "away")}
+                "id", "league", "league_name", "national_team", "women", "date_fi", "kickoff_fi", "home", "away")}
     covered = set(history["days_covered"]) | {d.isoformat() for d in fetched_days if d < today}
     oldest = (today - timedelta(days=HISTORY_KEEP)).isoformat()
     history["days_covered"] = sorted(d for d in covered if d >= oldest)

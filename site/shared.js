@@ -81,6 +81,56 @@ function updatedText(isoTime) {
   return t("updated", time);
 }
 
+// ---------------------------------------------------------------------------
+// Men / Women / All switch. Remembered on the device, like the language.
+// ---------------------------------------------------------------------------
+const GENDER_KEY = "finnftw-gender";
+let gender = loadGender();   // "all", "men" or "women"
+
+function loadGender() {
+  try {
+    const saved = localStorage.getItem(GENDER_KEY);
+    if (["all", "men", "women"].includes(saved)) return saved;
+  } catch {}
+  return "all";
+}
+
+// Should this match (or league) be shown with the current choice?
+function showsGender(isWomen) {
+  return gender === "all" || (gender === "women") === Boolean(isWomen);
+}
+
+function setUpGenderSwitch(redraw) {
+  const box = document.getElementById("gender");
+  const draw = () => {
+    box.replaceChildren();
+    box.setAttribute("aria-label", t("genderLabel"));
+    for (const [value, key] of [["men", "genderMen"], ["women", "genderWomen"], ["all", "genderAll"]]) {
+      const b = el("button", null, t(key));
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(value === gender));
+      b.addEventListener("click", () => {
+        gender = value;
+        try { localStorage.setItem(GENDER_KEY, value); } catch {}
+        draw();
+        redraw();
+      });
+      box.append(b);
+    }
+  };
+  draw();
+  return draw;   // the page calls this again when the language changes
+}
+
+// Finland's side in a national team match: the men's team (458) or Helmarit (7536).
+const FINLAND_TEAM_IDS = ["458", "7536"];
+function finlandSide(m) {
+  return FINLAND_TEAM_IDS.includes(m.home.id) ? m.home : m.away;
+}
+function nationalTeamName(isWomen) {
+  return t(isWomen ? "nationalTeamWomen" : "nationalTeam");
+}
+
 // Today's date in Finland, whatever time zone the visitor is in.
 function todayInFinland() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Helsinki" }).format(new Date());

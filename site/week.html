@@ -39,6 +39,7 @@
     </div>
     <p class="tagline"><strong>Finn for the Win.</strong> <span data-t="tagline">Finnish footballers playing abroad today, and where to watch them in Finland.</span></p>
     <nav class="pages" data-t-label="navLabel"><a href="./" data-t="navMatches">Matches</a><a href="week.html" aria-current="page" data-t="navWeek">This week</a><a href="finns.html" data-t="navFinns">All Finns</a></nav>
+    <div class="switch gender" id="gender" role="group"></div>
   </header>
 
   <p class="period" id="period" data-t="loadingWeek">Loading…</p>
@@ -100,7 +101,7 @@ function summarise(matches) {
     for (const side of [m.home, m.away]) {
       for (const f of side.finns) {
         if (!players.has(f.id)) {
-          players.set(f.id, { id: f.id, name: f.name, club: null, started: 0, cameOn: 0,
+          players.set(f.id, { id: f.id, name: f.name, club: null, women: m.women, started: 0, cameOn: 0,
                               bench: 0, notInSquad: 0, goals: [], assists: [] });
         }
         const p = players.get(f.id);
@@ -116,7 +117,7 @@ function summarise(matches) {
   }
   // Players seen only in national team matches: use their club from the
   // player list, or "Finland national team" if we don't follow their club.
-  for (const p of players.values()) if (!p.club) p.club = clubs.get(p.id) || t("nationalTeam");
+  for (const p of players.values()) if (!p.club) p.club = clubs.get(p.id) || nationalTeamName(p.women);
   return [...players.values()];
 }
 
@@ -146,7 +147,7 @@ function render() {
   if (!history) return;
   const today = todayInFinland();
   const from = daysBefore(today, WEEK_DAYS - 1);   // today and the 6 days before it
-  const matches = history.matches.filter(m => m.date_fi >= from && m.date_fi <= today);
+  const matches = history.matches.filter(m => m.date_fi >= from && m.date_fi <= today && showsGender(m.women));
   const players = summarise(matches);
 
   document.getElementById("period").replaceChildren(
@@ -174,11 +175,12 @@ function render() {
     return;
   }
 
-  // Finland's own results
-  const nt = matches.filter(m => m.national_team);
-  if (nt.length) {
+  // Finland's own results: men's team and Helmarit in separate boxes
+  for (const isWomen of [false, true]) {
+    const nt = matches.filter(m => m.national_team && Boolean(m.women) === isWomen);
+    if (!nt.length) continue;
     const box = el("section", "block nt");
-    box.append(el("h2", null, t("weekFinland")));
+    box.append(el("h2", null, nationalTeamName(isWomen)));
     const ul = el("ul", "results");
     for (const m of nt) {
       const li = el("li");
@@ -228,7 +230,8 @@ function redraw() {
   document.getElementById("report").href = reportFormUrl(t("reportWeekForm"));
   render();
 }
-setUpLanguageSwitch(redraw);
+const redrawGenderSwitch = setUpGenderSwitch(redraw);
+setUpLanguageSwitch(() => { redrawGenderSwitch(); redraw(); });
 redraw();
 loadData();
 </script>

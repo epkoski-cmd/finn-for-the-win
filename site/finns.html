@@ -39,6 +39,7 @@
     </div>
     <p class="tagline"><strong>Finn for the Win.</strong> <span data-t="tagline">Finnish footballers playing abroad today, and where to watch them in Finland.</span></p>
     <nav class="pages" data-t-label="navLabel"><a href="./" data-t="navMatches">Matches</a><a href="week.html" data-t="navWeek">This week</a><a href="finns.html" aria-current="page" data-t="navFinns">All Finns</a></nav>
+    <div class="switch gender" id="gender" role="group"></div>
   </header>
 
   <p class="intro" id="intro" data-t="loadingPlayers">Loading players…</p>
@@ -118,7 +119,8 @@ function untrackedNationalTeamPlayers() {
   const known = new Set(leagues.flatMap(l => l.players.map(p => p.id)));
   const found = new Map();
   for (const m of matches.filter(m => m.national_team)) {
-    const side = m.home.id === "458" ? m.home : m.away;
+    if (!showsGender(m.women)) continue;
+    const side = finlandSide(m);
     for (const f of side.finns) if (!known.has(f.id)) found.set(f.id, f.name);
   }
   return [...found].map(([id, name]) => ({ id, name }))
@@ -131,8 +133,9 @@ function matchesSearch(text, ...fields) {
 
 function render() {
   if (!generated) return;   // still loading
-  const total = leagues.reduce((n, l) => n + l.players.length, 0);
-  document.getElementById("intro").replaceChildren(el("strong", null, t("introCount", total)), t("introRest", leagues.length));
+  const shownLeagues = leagues.filter(l => showsGender(l.women));
+  const total = shownLeagues.reduce((n, l) => n + l.players.length, 0);
+  document.getElementById("intro").replaceChildren(el("strong", null, t("introCount", total)), t("introRest", shownLeagues.length));
   document.getElementById("updated").textContent = updatedText(generated);
 
   const text = document.getElementById("search").value.trim().toLowerCase();
@@ -140,7 +143,7 @@ function render() {
   list.replaceChildren();
   let shown = 0;
 
-  for (const league of leagues) {
+  for (const league of leagues.filter(l => showsGender(l.women))) {
     const players = league.players.filter(p => matchesSearch(text, p.name, p.club, league.name));
     if (!players.length) continue;
     shown += players.length;
@@ -189,7 +192,8 @@ function redraw() {
   document.getElementById("report").href = reportFormUrl(t("reportFinnsForm"));
   render();
 }
-setUpLanguageSwitch(redraw);
+const redrawGenderSwitch = setUpGenderSwitch(redraw);
+setUpLanguageSwitch(() => { redrawGenderSwitch(); redraw(); });
 redraw();
 loadData();
 </script>
