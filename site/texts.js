@@ -79,10 +79,6 @@ const TEXTS = {
     introRest: leagues => " " + leagues + " ulkomaisessa sarjassa. Napauta ☆, niin seuraat pelaajaa. Hänen ottelunsa merkitään silloin pääsivulle.",
     search: "Hae pelaajaa, seuraa tai sarjaa",
     next: "Seuraava:",
-    extraTitle: "Pelannut maajoukkueessa, ei vielä seurannassa",
-    extraNote: "Nämä pelaajat olivat Suomen viimeaikaisissa kokoonpanoissa, mutta heidän seuransa pelaavat sarjoissa, joita sivusto ei vielä seuraa. Siksi heidän seuraotteluitaan ei näy. Napauta linkkiä, niin pyydät lisäämään pelaajan.",
-    askToFollow: "Pyydä lisäämään seurantaan ↗",
-    askFormText: name => "Lisätkää seurantaan: " + name + " (pelasi maajoukkueessa)",
     noResultsTitle: text => "Ei tuloksia haulle ”" + text + "”",
     noResultsText: "Kokeile osaa nimestä, seuran nimeä tai sarjaa. Jos joku suomalainen puuttuu, kerro meille alla olevalla linkillä.",
     finnsFooter: "Pelaajat löytyvät automaattisesti seurojen pelaajalistoista, jotka tarkistetaan kerran viikossa. Seuraa juuri vaihtanut pelaaja voi näkyä vanhassa seurassaan muutaman päivän.",
@@ -90,7 +86,8 @@ const TEXTS = {
     reportFinnsForm: "Kaikki suomalaiset -sivu",
     untrackedTitle: "Emme vielä pysty seuraamaan näitä",
     untrackedNote: "Tiedämme näistä pelaajista. Tietolähteemme ei kata heidän sarjojaan, joten heidän otteluitaan ei näy sivulla. Niistä ei tarvitse ilmoittaa – lisäämme ne, jos löydämme keinon.",
-    untrackedChecked: date => "Lista on koottu käsin Helmarien kokoonpanoista ja tarkistettu " + date + ". Seurat ovat voineet vaihtua sen jälkeen.",
+    untrackedChecked: date => "Lista on koottu käsin maajoukkueiden kokoonpanoista ja tarkistettu " + date + ". Seurat ovat voineet vaihtua sen jälkeen.",
+    otherLeagues: "Muut sarjat",
     untrackedNoneKnown: "Ei tiedossa olevia suomalaisia juuri nyt.",
 
     // This week page
@@ -188,10 +185,6 @@ const TEXTS = {
     introRest: leagues => " in " + leagues + " leagues abroad. Tap ☆ to follow a player; their matches are then marked on the main page.",
     search: "Search for a player, club or league",
     next: "Next:",
-    extraTitle: "Played for Finland, not followed yet",
-    extraNote: "These players were in Finland's recent lineups, but their clubs are in leagues the site doesn't cover yet, so their club matches don't show up. Tap a link to ask us to add one.",
-    askToFollow: "Ask us to follow this player ↗",
-    askFormText: name => "Please follow " + name + " (played for Finland)",
     noResultsTitle: text => "No match for “" + text + "”",
     noResultsText: "Try part of a name, a club or a league. If a Finn is missing, tell us with the link below.",
     finnsFooter: "Players are found automatically from club squads, which are checked once a week. A player who just changed clubs may show at the old club for a few days.",
@@ -199,7 +192,8 @@ const TEXTS = {
     reportFinnsForm: "All Finns page",
     untrackedTitle: "Not tracked yet",
     untrackedNote: "We know about these players. Our data source doesn't cover their leagues, so their matches don't show up here. No need to report them; we'll add them if we find a way.",
-    untrackedChecked: date => "Listed by hand from Helmarit squads, checked " + date + ". Clubs may have changed since.",
+    untrackedChecked: date => "Listed by hand from national team squads, checked " + date + ". Clubs may have changed since.",
+    otherLeagues: "Other leagues",
     untrackedNoneKnown: "No Finns known there right now.",
 
     // This week page

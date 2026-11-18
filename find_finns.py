@@ -69,6 +69,13 @@ EXTRA_FINNS = {
     "221227": "Fredrik Oldrup Jensen",   # listed as Norway (2026-11-18)
 }
 
+# Finnish clubs are recognised by their code starting with "fin.", e.g.
+# "fin.fc_inter_turku". A few clubs' codes don't, so they're listed here by ID.
+# National team players at these clubs aren't shown as "not followed yet".
+FINNISH_CLUBS_WITHOUT_CODE = {
+    "133594": "IF Gnistan Helsinki",
+}
+
 # Women's football. The data source has fewer women's leagues: Sweden,
 # Germany, Italy, Norway and Denmark are missing (checked 2026-11-18).
 WOMEN_LEAGUES = [
@@ -145,9 +152,9 @@ def load_finnish_players():
         saved = json.loads(PLAYERS_FILE.read_text())
         age = datetime.now(timezone.utc) - datetime.fromisoformat(saved["updated"])
         # (A list saved before women's leagues were added is rebuilt.)
-        if age.days < PLAYER_LIST_MAX_AGE and all("women" in p for p in saved["players"]):
+        if age.days < PLAYER_LIST_MAX_AGE and "teams" in saved and all("women" in p for p in saved["players"]):
             print(f"Using saved list of {len(saved['players'])} Finnish players.")
-            return saved["players"]
+            return saved["players"], saved["teams"]
 
     print("Building the list of Finnish players (checks every squad, takes a minute)...")
     # First every team in every league...
@@ -173,11 +180,48 @@ def load_finnish_players():
             players.extend(finns)
 
     DATA_DIR.mkdir(exist_ok=True)
+    # Also keep every team we scanned (team ID -> league and name), so a club
+    # can be recognised later even if no Finn is in its squad list.
+    team_table = {team["id"]: {"league": league, "name": team["name"]} for league, team in teams}
     PLAYERS_FILE.write_text(json.dumps(
-        {"updated": datetime.now(timezone.utc).isoformat(), "players": players},
+        {"updated": datetime.now(timezone.utc).isoformat(), "players": players, "teams": team_table},
         ensure_ascii=False, indent=2))
     print(f"Found {len(players)} Finnish players in {len(teams)} squads.")
-    return players
+    return players, team_table
+
+
+def check_national_team_players(players, teams, history):
+    """Players who played for Finland (in the saved history) but aren't in
+    our list. Squad lists sometimes miss a player (e.g. Leo Walta at LAFC in
+    2026), so we look up each one's club directly:
+      - club in a league we follow -> add the player to the list
+      - club in Finland            -> skip (Finnish leagues are out of scope)
+      - club anywhere else         -> remember as "not followed" for the website
+    """
+    known = {p["id"] for p in players}
+    seen = {}
+    for m in history["matches"]:
+        if m["national_team"]:
+            for side in ("home", "away"):
+                if m[side]["id"] in FINLAND_TEAM_IDS:
+                    for f in m[side]["finns"]:
+                        if f["id"] not in known:
+                            seen[f["id"]] = (f["name"], m.get("women", False))
+    added, not_followed = [], []
+    for pid, (name, women) in seen.items():
+        try:
+            club = espn.player_club(pid)
+        except Exception:
+            continue   # lookup failed: try again on the next run
+        if club["id"] in teams:
+            team = teams[club["id"]]
+            added.append({"id": pid, "name": name, "team_id": club["id"], "team_name": team["name"],
+                          "league": team["league"], "women": team["league"] in WOMEN_COMPETITIONS})
+        elif not (club["slug"].startswith("fin.") or club["id"] in FINNISH_CLUBS_WITHOUT_CODE):
+            not_followed.append({"id": pid, "name": name, "club": club["name"], "women": women})
+    if added:
+        print("Added from national team lineups: " + ", ".join(p["name"] for p in added))
+    return players + added, not_followed
 
 
 # ---------------------------------------------------------------------------
@@ -270,7 +314,7 @@ def add_streaming_info(matches):
             m["watch"] = table["competitions"].get(m["league"])   # None if unknown
 
 
-def save_player_page_data(players):
+def save_player_page_data(players, not_followed):
     """Save the player list for the website's "All Finns" page, grouped by
     league in the same order as ALL_LEAGUES (England first, and so on)."""
     codes = sorted({p["league"] for p in players},
@@ -288,7 +332,8 @@ def save_player_page_data(players):
             "players": [{"id": p["id"], "name": p["name"], "club": p["team_name"]} for p in in_league],
         })
     PLAYERS_PAGE_FILE.write_text(json.dumps(
-        {"generated": datetime.now(timezone.utc).isoformat(), "leagues": leagues},
+        {"generated": datetime.now(timezone.utc).isoformat(), "leagues": leagues,
+         "national_team_not_followed": not_followed},
         ensure_ascii=False, indent=2))
 
 
@@ -336,11 +381,12 @@ def main():
         center = finnish_time(datetime.now(timezone.utc)).date()
     days = [center + timedelta(days=n) for n in range(-DAYS_BEFORE, DAYS_AFTER + 1)]
 
-    players = load_finnish_players()
+    players, teams = load_finnish_players()
 
     # Past days missing from the history (e.g. on the very first run) are
     # fetched too, so the weekly summary is complete. Normally none are.
     history = load_history()
+    players, not_followed = check_national_team_players(players, teams, history)
     missing = [center - timedelta(days=n) for n in range(1, HISTORY_DAYS + 1)
                if (center - timedelta(days=n)).isoformat() not in history["days_covered"]]
     start = min([days[0]] + missing)
@@ -359,7 +405,7 @@ def main():
          "days": [d.isoformat() for d in days],
          "matches": matches},
         ensure_ascii=False, indent=2))
-    save_player_page_data(players)
+    save_player_page_data(players, not_followed)
     update_history(history, fetched, fetch_days, center)
 
     # Print a readable summary in the Terminal.

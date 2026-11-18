@@ -23,8 +23,6 @@
 .league h2 .n { color: var(--muted); font-weight: 500; font-size: 1rem; }
 .league.nt-extra { border-style: dashed; }
 .league .note { margin: 0; font-size: 0.85rem; color: var(--muted); }
-.ask { font-size: 0.82rem; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
-.ask:hover { text-decoration-thickness: 2px; }
 .league h3.sub { margin: 4px 0 0; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .finns.plain .finn { grid-template-columns: 1fr; }   /* no star: these players can't be followed */
 .next { font-size: 0.82rem; color: var(--muted); }
@@ -68,6 +66,7 @@ let leagues = [];
 let matches = [];
 let generated = null;
 let untracked = null;     // untracked.json: players in leagues we can't follow
+let nationalTeamNotFollowed = [];   // from players.json, found automatically
 
 async function loadData() {
   try {
@@ -78,6 +77,7 @@ async function loadData() {
     ]);
     untracked = u;
     leagues = p.leagues;
+    nationalTeamNotFollowed = p.national_team_not_followed || [];
     matches = m.matches;
     generated = p.generated;
   } catch (err) {
@@ -118,21 +118,14 @@ function playerItem(p) {
   return li;
 }
 
-// Players who played for Finland in a match in our data, but aren't in our
-// list, because their club is in a league the site doesn't cover yet.
-function untrackedNationalTeamPlayers() {
-  const known = new Set(leagues.flatMap(l => l.players.map(p => p.id)));
-  const found = new Map();
-  for (const m of matches.filter(m => m.national_team)) {
-    if (!showsGender(m.women)) continue;
-    const side = finlandSide(m);
-    for (const f of side.finns) if (!known.has(f.id)) found.set(f.id, f.name);
-  }
-  // Players already in the hand-made "not tracked yet" list aren't repeated here.
+// National team players whose clubs we can't follow (found by find_finns.py),
+// minus anyone already in the hand-made list. Shown under "Other leagues".
+function otherLeaguePlayers() {
   const listed = new Set((untracked?.leagues || []).flatMap(l => l.players.map(p => p.name)));
-  return [...found].filter(([id, name]) => !listed.has(name))
-                   .map(([id, name]) => ({ id, name }))
-                   .sort((a, b) => a.name.localeCompare(b.name, "fi"));
+  return (nationalTeamNotFollowed || [])
+    .filter(p => !listed.has(p.name))
+    .map(p => ({ name: p.name, club: p.club, women: p.women }))
+    .sort((a, b) => a.name.localeCompare(b.name, "fi"));
 }
 
 function matchesSearch(text, ...fields) {
@@ -164,32 +157,13 @@ function render() {
     list.append(box);
   }
 
-  const extra = untrackedNationalTeamPlayers().filter(p => matchesSearch(text, p.name));
-  if (extra.length) {
-    shown += extra.length;
-    const box = el("section", "league nt-extra");
-    const h2 = el("h2", null, t("extraTitle"));
-    h2.append(el("span", "n", String(extra.length)));
-    const ul = el("ul", "finns");
-    for (const p of extra) {
-      const li = el("li", "finn");
-      const info = el("span", "info");
-      li.append(starButton(p.id, p.name), info);
-      info.append(el("span", "name", p.name));
-      // Opens the report form with the request already written in.
-      const ask = el("a", "ask", t("askToFollow"));
-      ask.href = reportFormUrl(t("askFormText", p.name));
-      ask.target = "_blank";
-      ask.rel = "noopener";
-      info.append(ask);
-      ul.append(li);
-    }
-    box.append(h2, el("p", "note", t("extraNote")), ul);
-    list.append(box);
-  }
-
   // Leagues we can't follow, with the Finns we know play there.
-  const groups = (untracked?.leagues || []).filter(l => showsGender(l.women))
+  const other = otherLeaguePlayers();
+  const allGroups = [...(untracked?.leagues || []),
+    ...[false, true].map(w => ({ name_fi: t("otherLeagues"), name_en: t("otherLeagues"), women: w,
+                                 players: other.filter(p => Boolean(p.women) === w) }))
+      .filter(g => g.players.length)];
+  const groups = allGroups.filter(l => showsGender(l.women))
     .map(l => ({ ...l, players: l.players.filter(p => matchesSearch(text, p.name, p.club, l.name_fi, l.name_en)) }))
     .filter(l => l.players.length || !text);
   if (groups.length) {

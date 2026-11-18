@@ -45,6 +45,16 @@ def league_teams(league):
     return [{"id": t["team"]["id"], "name": t["team"]["displayName"]} for t in teams]
 
 
+def player_club(player_id):
+    """A player's current club, looked up from the player's own page, e.g.
+        {"id": "18966", "name": "LAFC", "slug": "usa.lafc"}
+    The slug starts with the club's country ("fin." = a Finnish club).
+    Useful when a club's squad list is missing a player."""
+    data = get_json(f"https://site.web.api.espn.com/apis/common/v3/sports/soccer/athletes/{player_id}")
+    team = data.get("athlete", {}).get("team") or {}
+    return {"id": team.get("id"), "name": team.get("displayName"), "slug": team.get("slug") or ""}
+
+
 def team_squad(league, team_id):
     """The players in one team's squad, with their citizenship."""
     data = get_json(f"{BASE_URL}{league}/teams/{team_id}/roster")

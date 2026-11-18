@@ -1,21 +1,67 @@
 {
-  "_about": "Edited by hand. Finnish players we know about, but whose leagues our data source doesn't cover, so the site can't show their matches. Shown on the All Finns page under 'Not tracked yet'. Update 'checked' when you check the list. 'women': true = shown in the Women and All views.",
+  "_about": "Edited by hand. Finnish players (men and women) we know about, but whose leagues our data source doesn't cover, so the site can't show their matches. Shown on the All Finns page under 'Not tracked yet'. Update 'checked' when you check the list. 'women': true = shown in the Women and All views. Players at Finnish clubs are left out on purpose: the site covers Finns playing abroad.",
   "checked": "2026-11-18",
-  "source": "https://en.wikipedia.org/wiki/Finland_women%27s_national_football_team (squad and recent call-ups, June 2026)",
+  "source": "Finland men's and women's national team squads (Wikipedia, June 2026) and the clubs of recent national team players",
   "leagues": [
+    {
+      "name_fi": "Puola: Ekstraklasa",
+      "name_en": "Poland: Ekstraklasa",
+      "women": false,
+      "players": [
+        {
+          "name": "Daniel Håkans",
+          "club": "Lech Poznań"
+        }
+      ]
+    },
+    {
+      "name_fi": "Tšekki: Chance Liga",
+      "name_en": "Czechia: Chance Liga",
+      "women": false,
+      "players": [
+        {
+          "name": "Ryan Mahuta",
+          "club": "FK Pardubice"
+        }
+      ]
+    },
     {
       "name_fi": "Ruotsi: Damallsvenskan",
       "name_en": "Sweden: Damallsvenskan",
       "women": true,
       "players": [
-        { "name": "Adelina Engman", "club": "IF Brommapojkarna" },
-        { "name": "Paulina Nyström", "club": "BK Häcken" },
-        { "name": "Vilma Koivisto", "club": "Hammarby" },
-        { "name": "Katariina Kosola", "club": "Malmö FF" },
-        { "name": "Helmi Raijas", "club": "Växjö DFF" },
-        { "name": "Nanne Ruuskanen", "club": "Djurgården" },
-        { "name": "Julia Tunturi", "club": "Vittsjö GIK" },
-        { "name": "Ria Öling", "club": "FC Rosengård" }
+        {
+          "name": "Adelina Engman",
+          "club": "IF Brommapojkarna"
+        },
+        {
+          "name": "Paulina Nyström",
+          "club": "BK Häcken"
+        },
+        {
+          "name": "Vilma Koivisto",
+          "club": "Hammarby"
+        },
+        {
+          "name": "Katariina Kosola",
+          "club": "Malmö FF"
+        },
+        {
+          "name": "Helmi Raijas",
+          "club": "Växjö DFF"
+        },
+        {
+          "name": "Nanne Ruuskanen",
+          "club": "Djurgården"
+        },
+        {
+          "name": "Julia Tunturi",
+          "club": "Vittsjö GIK"
+        },
+        {
+          "name": "Ria Öling",
+          "club": "FC Rosengård"
+        }
       ]
     },
     {
@@ -23,10 +69,22 @@
       "name_en": "Norway: Toppserien",
       "women": true,
       "players": [
-        { "name": "Nea Lehtola", "club": "Brann" },
-        { "name": "Jasmin Mansaray", "club": "LSK Kvinner" },
-        { "name": "Emma Peuhkurinen", "club": "Brann" },
-        { "name": "Joanna Tynnilä", "club": "Brann" }
+        {
+          "name": "Nea Lehtola",
+          "club": "Brann"
+        },
+        {
+          "name": "Jasmin Mansaray",
+          "club": "LSK Kvinner"
+        },
+        {
+          "name": "Emma Peuhkurinen",
+          "club": "Brann"
+        },
+        {
+          "name": "Joanna Tynnilä",
+          "club": "Brann"
+        }
       ]
     },
     {
@@ -34,8 +92,14 @@
       "name_en": "Italy: Serie A Femminile",
       "women": true,
       "players": [
-        { "name": "Emma Koivisto", "club": "AC Milan" },
-        { "name": "Dana Leskinen", "club": "Parma" }
+        {
+          "name": "Emma Koivisto",
+          "club": "AC Milan"
+        },
+        {
+          "name": "Dana Leskinen",
+          "club": "Parma"
+        }
       ]
     },
     {
@@ -43,7 +107,10 @@
       "name_en": "Denmark: Kvindeligaen",
       "women": true,
       "players": [
-        { "name": "Milla-Maj Majasaari", "club": "Fortuna Hjørring" }
+        {
+          "name": "Milla-Maj Majasaari",
+          "club": "Fortuna Hjørring"
+        }
       ]
     },
     {
@@ -51,9 +118,18 @@
       "name_en": "England: women's second tier",
       "women": true,
       "players": [
-        { "name": "Lotta Lindström", "club": "Bristol City" },
-        { "name": "Oona Sevenius", "club": "Newcastle United" },
-        { "name": "Anna Tamminen", "club": "Newcastle United" }
+        {
+          "name": "Lotta Lindström",
+          "club": "Bristol City"
+        },
+        {
+          "name": "Oona Sevenius",
+          "club": "Newcastle United"
+        },
+        {
+          "name": "Anna Tamminen",
+          "club": "Newcastle United"
+        }
       ]
     },
     {
