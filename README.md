@@ -1,4 +1,4 @@
-# Finn to Win
+# Finn for the Win (Finn FTW)
 
 A website that shows which Finnish footballers play abroad on a given day,
 and where each match can be streamed legally in Finland.
