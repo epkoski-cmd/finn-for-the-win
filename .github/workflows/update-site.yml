@@ -66,6 +66,15 @@ jobs:
           cp data/players.json site/data/players.json
           cp data/history.json site/data/history.json
 
+      # Stamp the code version into the pages and files, so browsers never
+      # mix new pages with old saved files, and open tabs can spot an update.
+      # The version only changes when the code changes, not on data refreshes.
+      - name: Stamp the site version
+        run: |
+          VERSION="${GITHUB_SHA::7}"
+          sed -i "s/__VERSION__/$VERSION/g" site/*.html site/*.js
+          echo "{\"version\": \"$VERSION\"}" > site/version.json
+
       - name: Package the site
         uses: actions/upload-pages-artifact@v3
         with:

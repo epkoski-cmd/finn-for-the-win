@@ -7,7 +7,7 @@
 <meta name="description" content="Every Finnish footballer abroad that Finn for the Win follows, by league.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=__VERSION__">
 <style>
 /* Only for this page; everything else comes from style.css */
 .intro { margin: 0; color: var(--muted); }
@@ -53,8 +53,8 @@
   </footer>
 </div>
 
-<script src="texts.js"></script>
-<script src="shared.js"></script>
+<script src="texts.js?v=__VERSION__"></script>
+<script src="shared.js?v=__VERSION__"></script>
 <script>
 // ---------------------------------------------------------------------------
 // This page reads two saved files:
@@ -76,7 +76,7 @@ async function loadData() {
     matches = m.matches;
     generated = p.generated;
   } catch (err) {
-    document.getElementById("intro").textContent = t("playersError");
+    if (!generated) document.getElementById("intro").textContent = t("playersError");
     return;
   }
   document.getElementById("search").hidden = false;
@@ -196,6 +196,7 @@ const redrawGenderSwitch = setUpGenderSwitch(redraw);
 setUpLanguageSwitch(() => { redrawGenderSwitch(); redraw(); });
 redraw();
 loadData();
+keepUpToDate(loadData);
 </script>
 <!-- Visit counter (GoatCounter): counts page views, no cookies -->
 <script data-goatcounter="https://finnftw.goatcounter.com/count"

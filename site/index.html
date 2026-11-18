@@ -8,7 +8,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=__VERSION__">
 </head>
 <body data-title="pageTitle">
 
@@ -35,8 +35,8 @@
   </footer>
 </div>
 
-<script src="texts.js"></script>
-<script src="shared.js"></script>
+<script src="texts.js?v=__VERSION__"></script>
+<script src="shared.js?v=__VERSION__"></script>
 <script>
 // ---------------------------------------------------------------------------
 // 1. Load the data file that find_finns.py produced.
@@ -44,6 +44,7 @@
 // ---------------------------------------------------------------------------
 let data = null;          // the contents of matches.json
 let selectedDay = null;   // e.g. "2026-11-17"
+let shownToday = null;    // the date "today" was when the page last loaded data
 
 async function loadData() {
   try {
@@ -53,11 +54,16 @@ async function loadData() {
     if (!response.ok) throw new Error("HTTP " + response.status);
     data = await response.json();
   } catch (err) {
-    document.getElementById("summary").textContent = t("matchesError");
+    // If we already show matches (this was a refresh), keep showing them.
+    if (!data) document.getElementById("summary").textContent = t("matchesError");
     return;
   }
+  // Keep the chosen day on a refresh, unless the date has changed since.
   const today = todayInFinland();
-  selectedDay = data.days.includes(today) ? today : data.days[Math.floor(data.days.length / 2)];
+  if (!data.days.includes(selectedDay) || today !== shownToday) {
+    selectedDay = data.days.includes(today) ? today : data.days[Math.floor(data.days.length / 2)];
+  }
+  shownToday = today;
   renderAll();
 }
 
@@ -312,6 +318,7 @@ document.getElementById("general-report").href = reportUrl(null);
 const redrawGenderSwitch = setUpGenderSwitch(renderAll);
 setUpLanguageSwitch(() => { redrawGenderSwitch(); renderAll(); });
 loadData();
+keepUpToDate(loadData);
 </script>
 <!-- Visit counter (GoatCounter): counts page views, no cookies -->
 <script data-goatcounter="https://finnftw.goatcounter.com/count"

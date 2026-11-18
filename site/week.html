@@ -7,7 +7,7 @@
 <meta name="description" content="How the Finnish footballers abroad did over the last 7 days.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=__VERSION__">
 <style>
 /* Only for this page; everything else comes from style.css */
 .period { margin: 0; color: var(--muted); }
@@ -53,8 +53,8 @@
   </footer>
 </div>
 
-<script src="texts.js"></script>
-<script src="shared.js"></script>
+<script src="texts.js?v=__VERSION__"></script>
+<script src="shared.js?v=__VERSION__"></script>
 <script>
 // ---------------------------------------------------------------------------
 // This page reads history.json: every finished match with Finns from the
@@ -74,7 +74,7 @@ async function loadData() {
     history = h;
     for (const league of p.leagues) for (const pl of league.players) clubs.set(pl.id, pl.club);
   } catch (err) {
-    document.getElementById("period").textContent = t("weekError");
+    if (!history) document.getElementById("period").textContent = t("weekError");
     return;
   }
   render();
@@ -234,6 +234,7 @@ const redrawGenderSwitch = setUpGenderSwitch(redraw);
 setUpLanguageSwitch(() => { redrawGenderSwitch(); redraw(); });
 redraw();
 loadData();
+keepUpToDate(loadData);
 </script>
 <!-- Visit counter (GoatCounter): counts page views, no cookies -->
 <script data-goatcounter="https://finnftw.goatcounter.com/count"

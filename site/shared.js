@@ -1,5 +1,43 @@
 // Code shared by every page of Finn for the Win.
 
+// ---------------------------------------------------------------------------
+// Keeping visitors up to date.
+//   When the site is published, the GitHub job replaces __VERSION__ in every
+//   page and file with the code version (e.g. "a1b2c3d"). So after an update
+//   the files get new addresses (style.css?v=a1b2c3d), and a browser can't
+//   mix a new page with an old saved copy of a file.
+//   It also publishes version.json. When a visitor comes back to a tab left
+//   open, we compare: a new site version reloads the page; otherwise we just
+//   fetch the latest match data.
+// ---------------------------------------------------------------------------
+const SITE_VERSION = "__VERSION__";
+const STAMPED = !SITE_VERSION.startsWith("__");   // false when testing on a computer
+const CHECK_EVERY_MINUTES = 15;
+
+function keepUpToDate(refreshData) {
+  let lastCheck = Date.now();
+  async function check() {
+    lastCheck = Date.now();
+    try {
+      const r = await fetch("version.json", { cache: "no-cache" });
+      if (r.ok && STAMPED) {
+        const published = (await r.json()).version;
+        if (published && published !== SITE_VERSION) {
+          location.reload();   // the site itself changed: load the new version
+          return;
+        }
+      }
+    } catch {}
+    refreshData();             // same site version: just get the latest data
+  }
+  // When the visitor comes back to the tab (or switches back to the browser)...
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && Date.now() - lastCheck > 60000) check();
+  });
+  // ...and every 15 minutes while the page stays open on screen.
+  setInterval(() => { if (document.visibilityState === "visible") check(); }, CHECK_EVERY_MINUTES * 60000);
+}
+
 // Make an element, e.g. el("span", "name", "Ville Koski").
 function el(tag, className, text) {
   const node = document.createElement(tag);
