@@ -132,6 +132,8 @@ details.squad summary { cursor: pointer; color: var(--accent); font-weight: 500;
 details.squad .finns { margin-top: 6px; }
 
 .foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
+.foot-actions { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.filters .link-btn { justify-self: start; text-align: left; }
 .lineup-note { margin: 0; font-size: 0.82rem; color: var(--muted); font-style: italic; }
 .watch { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; font-size: 0.9rem; min-width: 0; }
 .watch .label { color: var(--muted); }

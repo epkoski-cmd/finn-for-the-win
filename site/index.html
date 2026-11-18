@@ -214,7 +214,15 @@ function matchCard(m) {
   reportLink.href = reportUrl(m);
   reportLink.target = "_blank";
   reportLink.rel = "noopener";
-  foot.append(watch, reportLink);
+  const actions = el("div", "foot-actions");
+  if (m.state === "pre") {
+    const cal = el("button", "link-btn", "📅 Add to calendar");
+    cal.type = "button";
+    cal.addEventListener("click", () => downloadCalendar([m], "finn-ftw-" + m.id + ".ics"));
+    actions.append(cal);
+  }
+  actions.append(reportLink);
+  foot.append(watch, actions);
   body.append(foot);
 
   card.append(body);
@@ -275,6 +283,16 @@ function renderFilters() {
        following.append(chip);
      });
   box.append(sw, following);
+
+  // One calendar file with every upcoming match of the followed players.
+  const upcoming = data.matches.filter(m => m.state === "pre" && hasFavourite(m));
+  if (upcoming.length) {
+    const cal = el("button", "link-btn", "📅 Add your players' next " +
+      (upcoming.length === 1 ? "match" : upcoming.length + " matches") + " to your calendar");
+    cal.type = "button";
+    cal.addEventListener("click", () => downloadCalendar(upcoming, "finn-ftw-my-finns.ics"));
+    box.append(cal);
+  }
 }
 
 function renderAll() {

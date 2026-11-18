@@ -23,6 +23,8 @@
 .league h2 .n { color: var(--muted); font-weight: 500; font-size: 1rem; }
 .league.nt-extra { border-style: dashed; }
 .league .note { margin: 0; font-size: 0.85rem; color: var(--muted); }
+.ask { font-size: 0.82rem; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.ask:hover { text-decoration-thickness: 2px; }
 .next { font-size: 0.82rem; color: var(--muted); }
 .next.soon { color: var(--accent); font-weight: 500; }
 </style>
@@ -159,10 +161,16 @@ function render() {
       const info = el("span", "info");
       li.append(starButton(p.id, p.name), info);
       info.append(el("span", "name", p.name));
+      // Opens the report form with the request already written in.
+      const ask = el("a", "ask", "Ask us to follow this player ↗");
+      ask.href = reportFormUrl("Please follow " + p.name + " (played for Finland)");
+      ask.target = "_blank";
+      ask.rel = "noopener";
+      info.append(ask);
       ul.append(li);
     }
     box.append(h2, el("p", "note",
-      "These players were in Finland's recent lineups, but their clubs are in leagues the site doesn't cover yet, so their club matches don't show up."), ul);
+      "These players were in Finland's recent lineups, but their clubs are in leagues the site doesn't cover yet, so their club matches don't show up. Tap a link to ask us to add one."), ul);
     list.append(box);
   }
 
