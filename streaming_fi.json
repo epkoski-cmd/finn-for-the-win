@@ -185,10 +185,11 @@
       "service": "Disney+",
       "free": false,
       "coverage": "all",
-      "note": "Disney+ has the rights 'across Europe' 2025/26-2029/30; Finland not named explicitly",
+      "note": "All matches on Disney+, deal 2025/26-2029/30. Confirmed in Finland by the site owner, a Disney+ subscriber",
       "checked": "2026-11-18",
-      "confidence": "guide",
-      "source": "https://thewaltdisneycompany.eu/disney-becomes-the-home-of-uefa-womens-champions-league-across-europe/"
+      "confidence": "official",
+      "source": "https://thewaltdisneycompany.eu/disney-becomes-the-home-of-uefa-womens-champions-league-across-europe/",
+      "url": "https://www.disneyplus.com/fi-fi"
     },
     "usa.nwsl": {
       "service": "NWSL+",
