@@ -23,6 +23,7 @@
   --good: #1e7a4c;  --good-soft: #e1f3e9;
   --warn: #8a5a00;  --warn-soft: #fbf0d9;
   --quiet-soft: #eef1f5;
+  --gold: #b07d00; --gold-soft: #fbf0d9;   /* favourite players */
   --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -31,6 +32,7 @@
     --bg: #0e1522; --surface: #162034; --fg: #e8edf5; --muted: #95a3b8; --line: #263349;
     --accent: #7fa8ea; --accent-soft: #1d2d4a; --accent-fg: #0e1522;
     --good: #6fd19c; --good-soft: #163527; --warn: #f0c060; --warn-soft: #3a2e14; --quiet-soft: #1d283c;
+    --gold: #f0c060; --gold-soft: #3a2e14;
     color-scheme: dark;
   }
 }
@@ -38,6 +40,7 @@
   --bg: #0e1522; --surface: #162034; --fg: #e8edf5; --muted: #95a3b8; --line: #263349;
   --accent: #7fa8ea; --accent-soft: #1d2d4a; --accent-fg: #0e1522;
   --good: #6fd19c; --good-soft: #163527; --warn: #f0c060; --warn-soft: #3a2e14; --quiet-soft: #1d283c;
+  --gold: #f0c060; --gold-soft: #3a2e14;
   color-scheme: dark;
 }
 
@@ -108,6 +111,27 @@ h1 .cross { color: var(--accent); }
 .role.came-on { background: var(--accent-soft); color: var(--accent); }
 .role.unused-sub, .role.not-in-squad { background: var(--quiet-soft); color: var(--muted); }
 
+/* Favourite players: a star button before each name */
+.star {
+  background: none; border: 0; padding: 0 2px; margin: 0; font: inherit; font-size: 1.05rem; line-height: 1;
+  color: var(--muted); cursor: pointer; align-self: center; min-width: 24px; min-height: 24px;
+}
+.star[aria-pressed="true"] { color: var(--gold); }
+.star:hover { color: var(--gold); }
+.finn.is-fav .name { font-weight: 700; }
+.match.fav { box-shadow: inset 4px 0 0 var(--gold); }
+
+/* "All Finns / My Finns" switch and the list of followed players */
+.filters { display: grid; gap: 8px; }
+.switch { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--surface); justify-self: start; }
+.switch button { font: inherit; font-size: 0.88rem; font-weight: 500; border: 0; border-radius: 999px; padding: 5px 14px; background: none; color: var(--muted); cursor: pointer; }
+.switch button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+.following { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--muted); margin: 0; }
+.chip { display: inline-flex; align-items: center; gap: 2px; padding: 1px 4px 1px 10px; border-radius: 999px; background: var(--gold-soft); color: var(--fg); font-weight: 500; }
+.chip button { background: none; border: 0; font: inherit; color: var(--muted); cursor: pointer; padding: 0 6px; font-size: 1rem; line-height: 1; }
+.chip button:hover { color: var(--fg); }
+.hint { margin: 0; font-size: 0.85rem; color: var(--muted); }
+
 details.squad summary { cursor: pointer; color: var(--accent); font-weight: 500; font-size: 0.9rem; }
 details.squad .finns { margin-top: 6px; }
 
@@ -161,6 +185,7 @@ footer p { margin: 0; }
   </header>
 
   <nav class="days" id="days" aria-label="Choose a day"></nav>
+  <div class="filters" id="filters"></div>
   <p class="summary" id="summary">Loading matches…</p>
   <section class="list" id="list" aria-live="polite"></section>
 
@@ -205,8 +230,7 @@ async function loadData() {
   }
   const today = todayInFinland();
   selectedDay = data.days.includes(today) ? today : data.days[Math.floor(data.days.length / 2)];
-  renderDays();
-  renderMatches();
+  renderAll();
   const generated = new Date(data.generated);
   document.getElementById("updated").textContent =
     "Updated " + generated.toLocaleString("fi-FI", { timeZone: "Europe/Helsinki", dateStyle: "short", timeStyle: "short" }) + ".";
@@ -236,15 +260,15 @@ function renderDays() {
     button.type = "button";
     button.setAttribute("aria-pressed", String(day === selectedDay));
     const dow = day === today ? "Today" : d.toLocaleDateString("en-GB", { weekday: "short" });
+    const n = visibleMatches(day).length;
     button.append(
       el("span", "dow", dow),
       el("span", "dnum", d.getDate() + "." + (d.getMonth() + 1) + "."),
-      el("span", "count", matchesOn(day).length + (matchesOn(day).length === 1 ? " match" : " matches")),
+      el("span", "count", n + (n === 1 ? " match" : " matches")),
     );
     button.addEventListener("click", () => {
       selectedDay = day;
-      renderDays();
-      renderMatches();
+      renderAll();
     });
     strip.append(button);
   }
@@ -254,19 +278,24 @@ function renderDays() {
 function renderMatches() {
   const list = document.getElementById("list");
   list.replaceChildren();
-  const matches = matchesOn(selectedDay);
+  const matches = visibleMatches(selectedDay);
 
   const finnCount = matches.reduce((n, m) => n + m.home.finns.length + m.away.finns.length, 0);
   const summary = document.getElementById("summary");
   summary.replaceChildren();
   if (matches.length) {
     summary.append(el("strong", null, matches.length + (matches.length === 1 ? " match" : " matches")),
-      " with Finnish players" + (finnCount ? " · " + finnCount + " Finns" : ""));
+      " with Finnish players" + (finnCount ? " · " + finnCount + (finnCount === 1 ? " Finn" : " Finns") : ""));
   } else {
     summary.textContent = "";
     const empty = el("div", "empty");
-    empty.append(el("strong", null, "No Finns playing this day"),
-      "Pick another day above. International breaks and winter pauses leave some days empty.");
+    if (onlyFavourites) {
+      empty.append(el("strong", null, "None of your players this day"),
+        "Pick another day above, or switch to All Finns.");
+    } else {
+      empty.append(el("strong", null, "No Finns playing this day"),
+        "Pick another day above. International breaks and winter pauses leave some days empty.");
+    }
     list.append(empty);
     return;
   }
@@ -274,15 +303,16 @@ function renderMatches() {
 }
 
 function finnItem(finn, clubName) {
-  const li = el("li", "finn");
-  li.append(el("span", "name", finn.name));
+  const li = el("li", "finn" + (isFavourite(finn.id) ? " is-fav" : ""));
+  li.append(starButton(finn), el("span", "name", finn.name));
   if (clubName) li.append(el("span", "club", clubName));
   if (finn.role) li.append(el("span", "role " + finn.role.replace(/ /g, "-"), ROLE_LABELS[finn.role] || finn.role));
   return li;
 }
 
 function matchCard(m) {
-  const card = el("article", "match" + (m.national_team ? " nt" : ""));
+  const card = el("article", "match" + (m.national_team ? " nt" : "") + (hasFavourite(m) ? " fav" : ""));
+  card.match = m;   // remembered so the gold edge can be updated without redrawing
   card.append(el("div", "time", m.kickoff_fi));
   const body = el("div", "body");
 
@@ -302,6 +332,7 @@ function matchCard(m) {
     const side = m.home.id === "458" ? m.home : m.away;
     if (side.finns.length) {
       const details = el("details", "squad");
+      details.open = side.finns.some(f => isFavourite(f.id));
       details.append(el("summary", null, side.finns.length + " Finns played"));
       const ul = el("ul", "finns");
       side.finns.forEach(f => ul.append(finnItem(f)));
@@ -352,7 +383,106 @@ function matchCard(m) {
 }
 
 // ---------------------------------------------------------------------------
-// 3. "Spotted an error?" links.
+// 3. Favourite players.
+//    Stored in the browser's "local storage": a small notebook each website
+//    gets on each device. Nothing is sent anywhere, so favourites stay on
+//    this phone or computer only. Players are saved by their ID number, so a
+//    favourite keeps working when the player moves clubs.
+// ---------------------------------------------------------------------------
+const FAVOURITES_KEY = "finnftw-favourites";
+let favourites = loadFavourites();   // e.g. { "275713": "Ilmari Niskanen" }
+let onlyFavourites = false;          // the "My Finns" switch
+
+function loadFavourites() {
+  // try/catch: some private-browsing modes refuse local storage.
+  try { return JSON.parse(localStorage.getItem(FAVOURITES_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveFavourites() {
+  try { localStorage.setItem(FAVOURITES_KEY, JSON.stringify(favourites)); } catch {}
+}
+function isFavourite(id) { return Object.prototype.hasOwnProperty.call(favourites, id); }
+function hasFavourite(m) { return [m.home, m.away].some(side => side.finns.some(f => isFavourite(f.id))); }
+
+function visibleMatches(day) {
+  const all = matchesOn(day);
+  return onlyFavourites ? all.filter(hasFavourite) : all;
+}
+
+function toggleFavourite(id, name) {
+  if (isFavourite(id)) delete favourites[id]; else favourites[id] = name;
+  saveFavourites();
+  if (!Object.keys(favourites).length) onlyFavourites = false;
+  if (onlyFavourites) {
+    renderAll();   // a match may need to disappear from the filtered list
+  } else {
+    // Update stars and gold edges in place, so the page doesn't jump around.
+    document.querySelectorAll('.star[data-player="' + id + '"]').forEach(btn => setStar(btn, id, name));
+    document.querySelectorAll(".match").forEach(card => card.classList.toggle("fav", hasFavourite(card.match)));
+    renderFilters();
+  }
+}
+
+function setStar(btn, id, name) {
+  const on = isFavourite(id);
+  btn.textContent = on ? "★" : "☆";
+  btn.setAttribute("aria-pressed", String(on));
+  btn.setAttribute("aria-label", (on ? "Stop following " : "Follow ") + name);
+  btn.title = on ? "Following" : "Follow this player";
+  btn.closest(".finn")?.classList.toggle("is-fav", on);
+}
+
+function starButton(finn) {
+  const btn = el("button", "star");
+  btn.type = "button";
+  btn.dataset.player = finn.id;
+  btn.addEventListener("click", () => toggleFavourite(finn.id, finn.name));
+  // setStar needs the button inside its list item, so run it once it's placed.
+  queueMicrotask(() => setStar(btn, finn.id, finn.name));
+  return btn;
+}
+
+function renderFilters() {
+  const box = document.getElementById("filters");
+  box.replaceChildren();
+  const ids = Object.keys(favourites);
+  if (!ids.length) {
+    box.append(el("p", "hint", "Tip: tap ☆ next to a player to follow them. Your picks are saved on this device only."));
+    return;
+  }
+  const sw = el("div", "switch");
+  sw.setAttribute("role", "group");
+  sw.setAttribute("aria-label", "Show");
+  for (const [label, value] of [["All Finns", false], ["★ My Finns", true]]) {
+    const b = el("button", null, label);
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(onlyFavourites === value));
+    b.addEventListener("click", () => { onlyFavourites = value; renderAll(); });
+    sw.append(b);
+  }
+  const following = el("p", "following", "Following:");
+  ids.map(id => [id, favourites[id]])
+     .sort((a, b) => a[1].localeCompare(b[1], "fi"))
+     .forEach(([id, name]) => {
+       const chip = el("span", "chip", name);
+       const x = el("button", null, "×");
+       x.type = "button";
+       x.setAttribute("aria-label", "Stop following " + name);
+       x.addEventListener("click", () => toggleFavourite(id, name));
+       chip.append(x);
+       following.append(chip);
+     });
+  box.append(sw, following);
+}
+
+function renderAll() {
+  renderFilters();
+  renderDays();
+  renderMatches();
+}
+
+// ---------------------------------------------------------------------------
+// 4. "Spotted an error?" links.
 //    Reports go to a Google Form. A match's link opens the form with the
 //    match already filled in ("pre-filled"), so the visitor only writes
 //    what's wrong.
