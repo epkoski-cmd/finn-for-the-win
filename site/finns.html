@@ -25,6 +25,8 @@
 .league .note { margin: 0; font-size: 0.85rem; color: var(--muted); }
 .ask { font-size: 0.82rem; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 .ask:hover { text-decoration-thickness: 2px; }
+.league h3.sub { margin: 4px 0 0; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.finns.plain .finn { grid-template-columns: 1fr; }   /* no star: these players can't be followed */
 .next { font-size: 0.82rem; color: var(--muted); }
 .next.soon { color: var(--accent); font-weight: 500; }
 </style>
@@ -65,13 +67,16 @@
 let leagues = [];
 let matches = [];
 let generated = null;
+let untracked = null;     // untracked.json: players in leagues we can't follow
 
 async function loadData() {
   try {
-    const [p, m] = await Promise.all([
+    const [p, m, u] = await Promise.all([
       fetch("data/players.json", { cache: "no-cache" }).then(r => { if (!r.ok) throw r; return r.json(); }),
       fetch("data/matches.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : { matches: [] }),
+      fetch("untracked.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
+    untracked = u;
     leagues = p.leagues;
     matches = m.matches;
     generated = p.generated;
@@ -123,7 +128,10 @@ function untrackedNationalTeamPlayers() {
     const side = finlandSide(m);
     for (const f of side.finns) if (!known.has(f.id)) found.set(f.id, f.name);
   }
-  return [...found].map(([id, name]) => ({ id, name }))
+  // Players already in the hand-made "not tracked yet" list aren't repeated here.
+  const listed = new Set((untracked?.leagues || []).flatMap(l => l.players.map(p => p.name)));
+  return [...found].filter(([id, name]) => !listed.has(name))
+                   .map(([id, name]) => ({ id, name }))
                    .sort((a, b) => a.name.localeCompare(b.name, "fi"));
 }
 
@@ -177,6 +185,32 @@ function render() {
       ul.append(li);
     }
     box.append(h2, el("p", "note", t("extraNote")), ul);
+    list.append(box);
+  }
+
+  // Leagues we can't follow, with the Finns we know play there.
+  const groups = (untracked?.leagues || []).filter(l => showsGender(l.women))
+    .map(l => ({ ...l, players: l.players.filter(p => matchesSearch(text, p.name, p.club, l.name_fi, l.name_en)) }))
+    .filter(l => l.players.length || !text);
+  if (groups.length) {
+    const box = el("section", "league nt-extra");
+    box.append(el("h2", null, t("untrackedTitle")),
+      el("p", "note", t("untrackedNote")),
+      el("p", "note", t("untrackedChecked", shortDateYear(untracked.checked))));
+    for (const l of groups) {
+      shown += l.players.length;
+      box.append(el("h3", "sub", lang === "fi" ? l.name_fi : l.name_en));
+      if (!l.players.length) { box.append(el("p", "note", t("untrackedNoneKnown"))); continue; }
+      const ul = el("ul", "finns plain");
+      for (const p of l.players) {
+        const li = el("li", "finn");
+        const info = el("span", "info");
+        info.append(el("span", "name", p.name), el("span", "club", p.club));
+        li.append(info);
+        ul.append(li);
+      }
+      box.append(ul);
+    }
     list.append(box);
   }
 

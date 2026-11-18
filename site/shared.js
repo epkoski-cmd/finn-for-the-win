@@ -110,6 +110,10 @@ function setUpLanguageSwitch(redraw) {
 function weekdayName(date) {
   return date.toLocaleDateString(lang === "fi" ? "fi-FI" : "en-GB", { weekday: "short" });
 }
+function shortDateYear(isoDay) {
+  const [y, m, d] = isoDay.split("-").map(Number);
+  return d + "." + m + "." + y;
+}
 function clockTime(hhmm) {
   return lang === "fi" ? hhmm.replace(":", ".") : hhmm;
 }

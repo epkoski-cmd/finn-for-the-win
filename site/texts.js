@@ -88,6 +88,10 @@ const TEXTS = {
     finnsFooter: "Pelaajat löytyvät automaattisesti seurojen pelaajalistoista, jotka tarkistetaan kerran viikossa. Seuraa juuri vaihtanut pelaaja voi näkyä vanhassa seurassaan muutaman päivän.",
     reportFinns: "Puuttuuko pelaaja tai onko seura väärä? Kerro meille",
     reportFinnsForm: "Kaikki suomalaiset -sivu",
+    untrackedTitle: "Emme vielä pysty seuraamaan näitä",
+    untrackedNote: "Tiedämme näistä pelaajista. Tietolähteemme ei kata heidän sarjojaan, joten heidän otteluitaan ei näy sivulla. Niistä ei tarvitse ilmoittaa – lisäämme ne, jos löydämme keinon.",
+    untrackedChecked: date => "Lista on koottu käsin Helmarien kokoonpanoista ja tarkistettu " + date + ". Seurat ovat voineet vaihtua sen jälkeen.",
+    untrackedNoneKnown: "Ei tiedossa olevia suomalaisia juuri nyt.",
 
     // This week page
     navWeek: "Viikko",
@@ -193,6 +197,10 @@ const TEXTS = {
     finnsFooter: "Players are found automatically from club squads, which are checked once a week. A player who just changed clubs may show at the old club for a few days.",
     reportFinns: "Is a player missing or at the wrong club? Tell us",
     reportFinnsForm: "All Finns page",
+    untrackedTitle: "Not tracked yet",
+    untrackedNote: "We know about these players. Our data source doesn't cover their leagues, so their matches don't show up here. No need to report them; we'll add them if we find a way.",
+    untrackedChecked: date => "Listed by hand from Helmarit squads, checked " + date + ". Clubs may have changed since.",
+    untrackedNoneKnown: "No Finns known there right now.",
 
     // This week page
     navWeek: "This week",

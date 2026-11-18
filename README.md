@@ -31,6 +31,7 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `site/finns.html` | The "All Finns" page: every followed player, with a search box. |
 | `site/style.css` | The look of both pages (colours, fonts, layout). |
 | `site/shared.js` | Code both pages use: language switch, favourite players, calendar files and the error-report link. |
+| `site/untracked.json` | Edited by hand: Finnish players in leagues we can't follow (e.g. Damallsvenskan), shown on the All Finns page. |
 | `site/texts.js` | Every text on the site in Finnish and English. Edit wordings here. |
 
 ## Running it
