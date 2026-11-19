@@ -19,6 +19,8 @@ This is called **caching**: do the slow work once, hand everyone the result.
 
 | File | What it is |
 |---|---|
+| `CLAUDE.md` | Rules and working practices for this project (read automatically by Claude). |
+| `IDEAS.md` | Ideas for further development. Anyone can add to it. |
 | `espn.py` | Every request to ESPN lives here. If ESPN changes, only this file needs fixing. |
 | `find_finns.py` | The main script: finds Finnish players, their matches and lineups, and saves the result. |
 | `streaming_fi.json` | Edited by hand: where each competition can be watched in Finland. Check it once a season. |
