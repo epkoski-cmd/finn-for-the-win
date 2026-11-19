@@ -20,8 +20,6 @@ Write ideas down as soon as they come up, even half-formed ones.
   (e.g. each followed player's club schedule).
 - **Calendar subscription per player** – a calendar link that updates by itself.
 - **Player page** – one player's recent matches, goals and next games.
-- **Link preview picture** (`og:image`) – the GitHub workflow draws a picture of the week 4× a day, so links
-  pasted into WhatsApp show it too. Needs a way to draw images in Python without extra libraries.
 - **Share a single match or player** – e.g. "Pohjanpalo scored twice" as its own picture.
 - **Notifications** ("your player is in the starting lineup") – needs a server or push
   service; a bigger learning project.
@@ -47,3 +45,4 @@ Write ideas down as soon as they come up, even half-formed ones.
 - Version stamps and update check, so visitors always get the latest site.
 - National team players missing from squad lists are found automatically (Leo Walta).
 - "Share this week as an image" button on the This week page (canvas picture, phone share menu).
+- Link preview pictures (`og:image`): a fixed one for the site, and the week's picture made 4× a day by headless Chrome.

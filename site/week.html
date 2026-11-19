@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>This week · Finn for the Win</title>
 <meta name="description" content="How the Finnish footballers abroad did over the last 7 days.">
+<!-- Link preview: what WhatsApp, Messages etc. show when this page's link is pasted.
+     The pictures are drawn by preview.html in the GitHub workflow. Always in English. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Finn for the Win">
+<meta property="og:title" content="This week · Finn for the Win">
+<meta property="og:description" content="How the Finnish footballers abroad did over the last 7 days: goalscorers, assists and who played.">
+<meta property="og:url" content="https://epkoski-cmd.github.io/finn-for-the-win/week.html">
+<meta property="og:image" content="https://epkoski-cmd.github.io/finn-for-the-win/preview-week.png?d=__PREVIEW_STAMP__">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Finns this week: the week's goals, assists and goalscorers.">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="style.css?v=__VERSION__">
@@ -63,25 +75,19 @@
 
 <script src="texts.js?v=__VERSION__"></script>
 <script src="shared.js?v=__VERSION__"></script>
+<script src="weekdata.js?v=__VERSION__"></script>
 <script src="share.js?v=__VERSION__"></script>
 <script>
 // ---------------------------------------------------------------------------
-// This page reads history.json: every finished match with Finns from the
-// last two weeks, kept up to date by find_finns.py. Here we take the last
-// 7 days and add the numbers up per player.
+// This page draws the last 7 days. The adding up happens in weekdata.js,
+// which the link preview picture (preview.html) uses too.
 // ---------------------------------------------------------------------------
-const WEEK_DAYS = 7;
 let history = null;
 let clubs = new Map();   // player ID -> club, from the "All Finns" list
 
 async function loadData() {
   try {
-    const [h, p] = await Promise.all([
-      fetch("data/history.json", { cache: "no-cache" }).then(r => { if (!r.ok) throw r; return r.json(); }),
-      fetch("data/players.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : { leagues: [] }),
-    ]);
-    history = h;
-    for (const league of p.leagues) for (const pl of league.players) clubs.set(pl.id, pl.club);
+    ({ history, clubs } = await fetchWeekData());
   } catch (err) {
     if (!history) document.getElementById("period").textContent = t("weekError");
     return;
@@ -89,45 +95,8 @@ async function loadData() {
   render();
 }
 
-// "2026-11-18" -> the date that many days earlier, in the same format.
-function daysBefore(isoDay, n) {
-  const d = new Date(isoDay + "T12:00:00Z");
-  d.setUTCDate(d.getUTCDate() - n);
-  return d.toISOString().slice(0, 10);
-}
-function shortDate(isoDay) {
-  const d = new Date(isoDay + "T12:00:00");
-  return weekdayName(d) + " " + d.getDate() + "." + (d.getMonth() + 1) + ".";
-}
 function resultText(m) {
   return m.home.name + " " + m.home.score + "–" + m.away.score + " " + m.away.name;
-}
-
-// Add up the week, player by player.
-function summarise(matches) {
-  const players = new Map();
-  for (const m of matches) {
-    for (const side of [m.home, m.away]) {
-      for (const f of side.finns) {
-        if (!players.has(f.id)) {
-          players.set(f.id, { id: f.id, name: f.name, club: null, women: m.women, started: 0, cameOn: 0,
-                              bench: 0, notInSquad: 0, goals: [], assists: [] });
-        }
-        const p = players.get(f.id);
-        if (!m.national_team) p.club = side.name;   // the club they played for this week
-        if (f.role === "started") p.started++;
-        else if (f.role === "came on") p.cameOn++;
-        else if (f.role === "unused sub") p.bench++;
-        else if (f.role === "not in squad") p.notInSquad++;
-        if (f.goals) p.goals.push({ n: f.goals.length, match: m });
-        if (f.assists) p.assists.push({ n: f.assists, match: m });
-      }
-    }
-  }
-  // Players seen only in national team matches: use their club from the
-  // player list, or "Finland national team" if we don't follow their club.
-  for (const p of players.values()) if (!p.club) p.club = clubs.get(p.id) || nationalTeamName(p.women);
-  return [...players.values()];
 }
 
 function playerRow(p, extras, detail) {
@@ -149,23 +118,15 @@ function block(title, rows, note, extraClass) {
   return box;
 }
 
-const total = list => list.reduce((n, x) => n + x.n, 0);
-const byName = (a, b) => a.name.localeCompare(b.name, "fi");
-
 function render() {
   if (!history) return;
-  const today = todayInFinland();
-  const from = daysBefore(today, WEEK_DAYS - 1);   // today and the 6 days before it
-  const matches = history.matches.filter(m => m.date_fi >= from && m.date_fi <= today && showsGender(m.women));
-  const players = summarise(matches);
+  const week = weekSummary(history, clubs);
+  const { from, to, matches, players, played, goals, assists, scorers, assisters } = week;
 
   document.getElementById("period").replaceChildren(
-    t("weekPeriod"), el("strong", null, shortDate(from) + " – " + shortDate(today)));
+    t("weekPeriod"), el("strong", null, shortDate(from) + " – " + shortDate(to)));
   document.getElementById("updated").textContent = updatedText(history.generated);
 
-  const played = players.filter(p => p.started + p.cameOn > 0);
-  const goals = players.reduce((n, p) => n + total(p.goals), 0);
-  const assists = players.reduce((n, p) => n + total(p.assists), 0);
   const tiles = document.getElementById("tiles");
   tiles.replaceChildren();
   for (const [num, label] of [[played.length, t("tilePlayed")], [goals, t("tileGoals")],
@@ -177,14 +138,7 @@ function render() {
 
   const sections = document.getElementById("sections");
   sections.replaceChildren();
-  // The share picture: goalscorers and assists, most first
-  const scorers = players.filter(p => p.goals.length).sort((a, b) => total(b.goals) - total(a.goals) || byName(a, b));
-  const assisters = players.filter(p => p.assists.length).sort((a, b) => total(b.assists) - total(a.assists) || byName(a, b));
-  updateShare({
-    from, to: today, played: played.length, goals, assists,
-    scorers: scorers.map(p => ({ id: p.id, name: p.name, club: p.club, goalCount: total(p.goals) })),
-    assisters: assisters.map(p => ({ id: p.id, name: p.name, club: p.club, assistCount: total(p.assists) })),
-  });
+  updateShare(week);   // the "Share this week as an image" button
 
   if (!matches.length) {
     const empty = el("div", "empty");
@@ -212,12 +166,12 @@ function render() {
   // Goals and assists, most first
   if (scorers.length) {
     sections.append(block(t("weekGoals"), scorers.map(p => playerRow(p,
-      [el("span", "count-pill", "⚽ " + total(p.goals))],
+      [el("span", "count-pill", "⚽ " + p.goalCount)],
       p.goals.map(g => resultText(g.match) + ", " + shortDate(g.match.date_fi)).join(" · ")))));
   }
   if (assisters.length) {
     sections.append(block(t("weekAssists"), assisters.map(p => playerRow(p,
-      [el("span", "count-pill", "🅰️ " + total(p.assists))],
+      [el("span", "count-pill", "🅰️ " + p.assistCount)],
       p.assists.map(a => resultText(a.match) + ", " + shortDate(a.match.date_fi)).join(" · ")))));
   }
 

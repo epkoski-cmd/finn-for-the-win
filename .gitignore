@@ -5,3 +5,4 @@ site/data/
 __pycache__/
 .DS_Store
 site/version.json
+site/preview-*.png

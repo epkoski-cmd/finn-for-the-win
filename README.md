@@ -32,7 +32,9 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `site/week.html` | The "This week" page: goals, assists and who played in the last 7 days. |
 | `site/finns.html` | The "All Finns" page: every followed player, with a search box. |
 | `site/style.css` | The look of both pages (colours, fonts, layout). |
-| `site/share.js` | The "Share this week as an image" button: draws the week's goalscorers and assists on a canvas and opens the phone's share menu (or downloads the picture on a computer). |
+| `site/share.js` | Draws the share picture and the link preview pictures on a canvas. The "Share this week as an image" button: draws the week's goalscorers and assists on a canvas and opens the phone's share menu (or downloads the picture on a computer). |
+| `site/weekdata.js` | Adds up the last 7 days (goals, assists, who played). Used by the This week page and the link preview. |
+| `site/preview.html` | Hidden helper page. The workflow opens it in Chrome and saves screenshots as `preview-site.png` and `preview-week.png`: the pictures shown when a link is pasted into WhatsApp etc. Always English. |
 | `site/shared.js` | Code both pages use: language switch, favourite players, calendar files and the error-report link. |
 | `site/untracked.json` | Edited by hand: Finnish players in leagues we can't follow (e.g. Damallsvenskan), shown on the All Finns page. |
 | `site/texts.js` | Every text on the site in Finnish and English. Edit wordings here. |
@@ -57,6 +59,8 @@ Later runs reuse the saved player list and are quicker.
 - **Join**: matching two sets of data on a shared key, e.g. a match's team ID against the team IDs of Finnish players.
 - **Canvas**: a blank drawing area in the browser. Our code writes text and shapes on it and saves it as a picture.
 - **Web Share API**: lets a web page open the phone's own share menu (WhatsApp, Messages…). Most computers don't have it, so there we download the file instead.
+- **Link preview (Open Graph)**: hidden `<meta property="og:…">` lines in a page's `<head>`. Chat apps read them to show a title, text and picture when a link is pasted.
+- **Headless Chrome**: Chrome running without a window, controlled by a script. The workflow uses it to take screenshots.
 - **Parallel requests**: asking ESPN for several things at once instead of one after another, so the script finishes faster.
 
 ## Known limits
@@ -75,3 +79,4 @@ Later runs reuse the saved player list and are quicker.
 - The streaming table is partly from a Finnish streaming guide, not official sources. Entries are marked `"confidence": "guide"` until confirmed.
 - The share picture fits about 4–5 goalscorers; in busy weeks the rest become "+ N more". Sharing a file needs a fairly
   new phone browser; older ones download the picture instead.
+- Chat apps remember a link's preview, sometimes for days, so a pasted This week link may show an older week's picture.

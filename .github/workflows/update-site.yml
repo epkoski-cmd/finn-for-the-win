@@ -74,6 +74,26 @@ jobs:
           VERSION="${GITHUB_SHA::7}"
           sed -i "s/__VERSION__/$VERSION/g" site/*.html site/*.js
           echo "{\"version\": \"$VERSION\"}" > site/version.json
+          # The week's link preview picture changes on every run, so its
+          # address gets the date and hour. Apps then fetch the new one.
+          sed -i "s/__PREVIEW_STAMP__/$(date -u +%Y%m%d%H)/g" site/*.html
+
+      # Link preview pictures: shown when a link is pasted into WhatsApp etc.
+      # Google Chrome is already installed on GitHub's computer. We open our
+      # hidden page preview.html in Chrome without a window ("headless") and
+      # save screenshots of it. If this step fails, the site is still published.
+      - name: Draw the link preview pictures
+        continue-on-error: true
+        run: |
+          cd site
+          python -m http.server 8000 > /dev/null 2>&1 &
+          sleep 2
+          for card in site week; do
+            google-chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
+              --force-device-scale-factor=1 --window-size=1200,630 --virtual-time-budget=10000 \
+              --screenshot="$PWD/preview-$card.png" "http://localhost:8000/preview.html?card=$card"
+          done
+          ls -l preview-*.png
 
       - name: Package the site
         uses: actions/upload-pages-artifact@v3

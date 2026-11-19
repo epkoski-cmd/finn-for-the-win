@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Link preview picture · Finn for the Win</title>
+<!--
+  A hidden helper page, not linked from the site.
+
+  When a link is pasted into WhatsApp or Messages, the app shows a picture
+  named in the page's <meta property="og:image"> tag. Those apps don't run
+  our JavaScript, so the picture must already exist as a file.
+
+  The GitHub workflow opens this page in Chrome without a window
+  ("headless") and saves a screenshot of it:
+    preview.html?card=site -> preview-site.png  (main page and All Finns)
+    preview.html?card=week -> preview-week.png  (This week page)
+
+  The previews are always in English and include both men and women.
+-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+  html, body { margin: 0; overflow: hidden; background: #1a4fa0; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="card" width="1200" height="630"></canvas>
+
+<script src="texts.js?v=__VERSION__"></script>
+<script src="shared.js?v=__VERSION__"></script>
+<script src="weekdata.js?v=__VERSION__"></script>
+<script src="share.js?v=__VERSION__"></script>
+<script>
+// Fixed settings for previews: English, men and women, no followed players.
+lang = "en";
+gender = "all";
+favourites = {};
+
+async function drawPreview() {
+  const ctx = document.getElementById("card").getContext("2d");
+  await loadCardFonts();
+  if (new URLSearchParams(location.search).get("card") === "week") {
+    try {
+      const { history, clubs } = await fetchWeekData();
+      const week = weekSummary(history, clubs);
+      // A week with goals or assists gets its own picture; a quiet week
+      // falls back to the site picture below.
+      if (week.scorers.length || week.assisters.length) {
+        drawWideWeek(ctx, week);
+        return;
+      }
+    } catch {}
+  }
+  drawWideSite(ctx);
+}
+drawPreview();
+</script>
+</body>
+</html>
