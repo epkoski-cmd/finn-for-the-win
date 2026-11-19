@@ -109,6 +109,18 @@ const TEXTS = {
     weekDidntPlayNote: "Joukkue pelasi, mutta pelaaja ei päässyt kentälle. Syy voi olla esimerkiksi loukkaantuminen tai valmentajan valinta.",
     weekFooter: "Mukana ovat viimeisen 7 päivän päättyneet ottelut. Maalisyöttöjä voi puuttua joistakin otteluista.",
     reportWeekForm: "Viikko-sivu",
+
+    // Share image on the This week page
+    shareButton: "📤 Jaa viikon kuva",
+    shareMaking: "Tehdään kuvaa…",
+    shareDownloaded: "Kuva tallennettiin laitteellesi.",
+    shareError: "Kuvaa ei saatu tehtyä. Kokeile uudestaan.",
+    shareFileName: "finn-ftw-viikko",
+    shareTitle: "Viikon suomalaiset",
+    shareGoals: "MAALIT",
+    shareAssists: "MAALISYÖTÖT",
+    shareMore: n => "+ " + n + " muuta",
+    shareFooter: "Ulkomailla pelaavat suomalaiset ja mistä katsoa:",
   },
 
   en: {
@@ -215,5 +227,17 @@ const TEXTS = {
     weekDidntPlayNote: "Their team played, but they didn't get on the pitch, for example because of an injury or the coach's choice.",
     weekFooter: "Counts finished matches from the last 7 days. Assists may be missing for some matches.",
     reportWeekForm: "This week page",
+
+    // Share image on the This week page
+    shareButton: "📤 Share this week as an image",
+    shareMaking: "Making the image…",
+    shareDownloaded: "Image saved to your device.",
+    shareError: "The image couldn't be made. Try again.",
+    shareFileName: "finn-ftw-week",
+    shareTitle: "Finns this week",
+    shareGoals: "GOALS",
+    shareAssists: "ASSISTS",
+    shareMore: n => "+ " + n + " more",
+    shareFooter: "Finnish footballers abroad, and where to watch:",
   },
 };

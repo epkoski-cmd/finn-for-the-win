@@ -26,6 +26,10 @@
 .results .res { font-weight: 600; }
 .results .when { font-size: 0.82rem; color: var(--muted); }
 .detail { font-size: 0.82rem; color: var(--muted); flex-basis: 100%; }
+.share { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.share-btn { font: inherit; font-weight: 600; border: 0; border-radius: 999px; padding: 9px 18px; background: var(--accent); color: var(--accent-fg); cursor: pointer; }
+.share-btn:hover { filter: brightness(1.08); }
+.share-status { font-size: 0.85rem; color: var(--muted); }
 .count-pill { font-size: 0.78rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--quiet-soft); white-space: nowrap; }
 </style>
 </head>
@@ -44,6 +48,10 @@
 
   <p class="period" id="period" data-t="loadingWeek">Loading…</p>
   <div class="tiles" id="tiles"></div>
+  <div class="share" id="share" hidden>
+    <button type="button" class="share-btn" id="share-btn"></button>
+    <span class="share-status" id="share-status" aria-live="polite"></span>
+  </div>
   <div id="sections" class="list"></div>
 
   <footer>
@@ -55,6 +63,7 @@
 
 <script src="texts.js?v=__VERSION__"></script>
 <script src="shared.js?v=__VERSION__"></script>
+<script src="share.js?v=__VERSION__"></script>
 <script>
 // ---------------------------------------------------------------------------
 // This page reads history.json: every finished match with Finns from the
@@ -168,6 +177,15 @@ function render() {
 
   const sections = document.getElementById("sections");
   sections.replaceChildren();
+  // The share picture: goalscorers and assists, most first
+  const scorers = players.filter(p => p.goals.length).sort((a, b) => total(b.goals) - total(a.goals) || byName(a, b));
+  const assisters = players.filter(p => p.assists.length).sort((a, b) => total(b.assists) - total(a.assists) || byName(a, b));
+  updateShare({
+    from, to: today, played: played.length, goals, assists,
+    scorers: scorers.map(p => ({ id: p.id, name: p.name, club: p.club, goalCount: total(p.goals) })),
+    assisters: assisters.map(p => ({ id: p.id, name: p.name, club: p.club, assistCount: total(p.assists) })),
+  });
+
   if (!matches.length) {
     const empty = el("div", "empty");
     empty.append(el("strong", null, t("weekEmptyTitle")), t("weekEmptyText"));
@@ -192,13 +210,11 @@ function render() {
   }
 
   // Goals and assists, most first
-  const scorers = players.filter(p => p.goals.length).sort((a, b) => total(b.goals) - total(a.goals) || byName(a, b));
   if (scorers.length) {
     sections.append(block(t("weekGoals"), scorers.map(p => playerRow(p,
       [el("span", "count-pill", "⚽ " + total(p.goals))],
       p.goals.map(g => resultText(g.match) + ", " + shortDate(g.match.date_fi)).join(" · ")))));
   }
-  const assisters = players.filter(p => p.assists.length).sort((a, b) => total(b.assists) - total(a.assists) || byName(a, b));
   if (assisters.length) {
     sections.append(block(t("weekAssists"), assisters.map(p => playerRow(p,
       [el("span", "count-pill", "🅰️ " + total(p.assists))],
@@ -232,6 +248,7 @@ function redraw() {
 }
 const redrawGenderSwitch = setUpGenderSwitch(redraw);
 setUpLanguageSwitch(() => { redrawGenderSwitch(); redraw(); });
+setUpShareButton();
 redraw();
 loadData();
 keepUpToDate(loadData);

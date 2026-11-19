@@ -311,9 +311,13 @@ function downloadCalendar(matchList, fileName) {
     ...matchList.flatMap(icsEvent),
     "END:VCALENDAR",
   ].map(icsFold).join("\r\n");   // the format asks for Windows-style line endings
-  const file = new Blob([text], { type: "text/calendar;charset=utf-8" });
+  offerDownload(new Blob([text], { type: "text/calendar;charset=utf-8" }), fileName);
+}
+
+// Hand a file made in the browser to the visitor as a download.
+function offerDownload(blob, fileName) {
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(file);
+  link.href = URL.createObjectURL(blob);
   link.download = fileName;
   document.body.append(link);
   link.click();
