@@ -69,7 +69,10 @@ function setUpShareButton() {
     }
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], title: t("shareTitle") });
+        // The message that goes with the picture, with a tappable link to
+        // this page (the address it's opened from, so it's always right).
+        const link = location.origin + location.pathname;
+        await navigator.share({ files: [file], title: t("shareTitle"), text: t("shareMessage", link) });
         return;
       } catch (err) {
         if (err.name === "AbortError") return;   // the visitor closed the share menu
