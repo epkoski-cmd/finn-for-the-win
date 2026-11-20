@@ -8,6 +8,7 @@ Write ideas down as soon as they come up, even half-formed ones.
   in the Finnish view. A small name table in `texts.js`.
 - **Housekeeping: update the GitHub Actions versions** – runs warn that Node 20 is being
   retired. Small change, but do it before it starts failing.
+- **Add name of the Finn's team to the calendar event description** – the user may not remember which teams tge Finns pkay for
 
 
 ## Maybe later
