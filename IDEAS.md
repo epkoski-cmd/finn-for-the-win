@@ -9,7 +9,9 @@ Write ideas down as soon as they come up, even half-formed ones.
 - **Housekeeping: update the GitHub Actions versions** – runs warn that Node 20 is being
   retired. Small change, but do it before it starts failing.
 
+
 ## Maybe later
+- **New feature: Automatically add matches for starred playets to the users calendar. 
 - **Women's leagues we can't track yet** – find a free data source for Damallsvenskan,
   Toppserien, Serie A Femminile and Kvindeligaen (many Helmarit players are there).
 - **More men's leagues** – Poland (Håkans) and Czechia (Mahuta) are missing from the data
