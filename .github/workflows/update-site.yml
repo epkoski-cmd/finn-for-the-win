@@ -61,6 +61,8 @@ jobs:
         run: |
           mkdir -p data
           curl -fsSL https://epkoski-cmd.github.io/finn-for-the-win/data/history.json -o data/history.json || rm -f data/history.json
+          # Same for the list of everyone who has played for Finland lately.
+          curl -fsSL https://epkoski-cmd.github.io/finn-for-the-win/data/national_team_players.json -o data/national_team_players.json || rm -f data/national_team_players.json
 
       - name: Find the Finns' matches
         run: python find_finns.py
@@ -71,6 +73,7 @@ jobs:
           cp data/matches.json site/data/matches.json
           cp data/players.json site/data/players.json
           cp data/history.json site/data/history.json
+          cp data/national_team_players.json site/data/national_team_players.json
           # One calendar file per player, for "Subscribe in calendar"
           rm -rf site/calendars
           cp -r data/calendars site/calendars

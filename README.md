@@ -28,6 +28,7 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `data/matches.json` | The result: matches with Finns, which the website will read. |
 | `data/players.json` | Every Finn we follow, grouped by league, for the website's "All Finns" page. |
 | `data/calendars/<id>.ics` | One calendar file per player, rewritten on every run. Visitors subscribe to them from the All Finns page ("Subscribe in calendar"). Always in English. |
+| `data/national_team_players.json` | Everyone who has played for Finland in the last year (from the history's national team lineups). Used to find Finns missing from club squad lists, also between international windows. Kept on the live site between runs, like the history. |
 | `data/history.json` | Finished matches from the last two weeks, for the weekly summary. Kept on the live site between runs. |
 | `.github/workflows/update-site.yml` | The automatic update, 4× a day and on every push. Two jobs: **build** (run the script, draw preview pictures, package the site) and **publish** (put it on GitHub Pages). |
 | `site/index.html` | The main page: matches by day. |
@@ -91,7 +92,7 @@ Later runs reuse the saved player list and are quicker.
 - Women's football: the data source has the English, Spanish, French, Dutch, US, Canadian, Australian and Mexican leagues,
   the Women's Champions League and Helmarit, but not Sweden, Germany, Italy, Norway or Denmark, where many Finnish women play.
 - Club squad lists sometimes miss a player (e.g. Leo Walta at LAFC). The script therefore looks up the club of every
-  Finland national team player it hasn't found, and adds them if their club is in a league we follow. Players at Finnish
+  Finland national team player of the last year (`national_team_players.json`) it hasn't found, and adds them if their club is in a league we follow. Players at Finnish
   clubs are skipped on purpose; Finnish clubs are recognised by a code starting with `fin.`, plus `FINNISH_CLUBS_WITHOUT_CODE`.
 - A few Finns are listed under another citizenship (e.g. Fredrik Oldrup Jensen as Norwegian). Add them to `EXTRA_FINNS`
   in `find_finns.py`. The website's "Played for Finland, not followed yet" list shows who might be missing.

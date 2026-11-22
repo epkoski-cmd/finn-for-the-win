@@ -125,6 +125,8 @@ PLAYERS_FILE = DATA_DIR / "finnish_players.json"
 MATCHES_FILE = DATA_DIR / "matches.json"
 PLAYERS_PAGE_FILE = DATA_DIR / "players.json"   # read by the website's "All Finns" page
 HISTORY_FILE = DATA_DIR / "history.json"         # finished matches, for the weekly summary
+NATIONAL_TEAM_FILE = DATA_DIR / "national_team_players.json"   # everyone who has played for Finland lately
+NATIONAL_TEAM_KEEP_DAYS = 365   # a player is dropped a year after their last Finland match
 CALENDAR_DIR = DATA_DIR / "calendars"            # one calendar file per player, for subscribing
 SITE_URL = "https://epkoski-cmd.github.io/finn-for-the-win/"
 HISTORY_DAYS = 7           # the weekly summary covers this many past days
@@ -241,23 +243,49 @@ def drop_wrong_clubs(players):
     return kept
 
 
-def check_national_team_players(players, teams, history, cache):
-    """Players who played for Finland (in the saved history) but aren't in
-    our list. Squad lists sometimes miss a player (e.g. Leo Walta at LAFC in
-    2026), so we look up each one's club directly:
-      - club in a league we follow -> add the player to the list
-      - club in Finland            -> skip (Finnish leagues are out of scope)
-      - club anywhere else         -> remember as "not followed" for the website
-    """
-    known = {p["id"] for p in players}
-    seen = {}
+def load_national_team_players():
+    """Everyone who has played for Finland lately: player ID -> name, women
+    and the date of their last Finland match. Kept on the live site between
+    runs (like the history), so it lasts between international windows,
+    when the 14-day history has no national team matches."""
+    if NATIONAL_TEAM_FILE.exists():
+        try:
+            return json.loads(NATIONAL_TEAM_FILE.read_text())["players"]
+        except (ValueError, KeyError):
+            pass   # a damaged file: start again from the history
+    return {}
+
+
+def remember_national_team_players(known, history, today):
+    """Add the Finland players from the history's national team matches,
+    drop those whose last Finland match was over a year ago, and save."""
     for m in history["matches"]:
         if m["national_team"]:
             for side in ("home", "away"):
                 if m[side]["id"] in FINLAND_TEAM_IDS:
                     for f in m[side]["finns"]:
-                        if f["id"] not in known:
-                            seen[f["id"]] = (f["name"], m.get("women", False))
+                        old = known.get(f["id"], {}).get("last_match", "")
+                        known[f["id"]] = {"name": f["name"], "women": m.get("women", False),
+                                          "last_match": max(old, m["date_fi"])}
+    oldest = (today - timedelta(days=NATIONAL_TEAM_KEEP_DAYS)).isoformat()
+    for pid in [pid for pid, p in known.items() if p["last_match"] < oldest]:
+        del known[pid]
+    DATA_DIR.mkdir(exist_ok=True)
+    NATIONAL_TEAM_FILE.write_text(json.dumps(
+        {"generated": datetime.now(timezone.utc).isoformat(), "players": known},
+        ensure_ascii=False, indent=2))
+
+
+def check_national_team_players(players, teams, national_team, cache):
+    """Players who have played for Finland lately but aren't in our list.
+    Squad lists sometimes miss a player (e.g. Leo Walta at LAFC in 2026),
+    so we look up each one's club directly:
+      - club in a league we follow -> add the player to the list
+      - club in Finland            -> skip (Finnish leagues are out of scope)
+      - club anywhere else         -> remember as "not followed" for the website
+    """
+    known = {p["id"] for p in players}
+    seen = {pid: (p["name"], p["women"]) for pid, p in national_team.items() if pid not in known}
     added, not_followed = [], []
     known_clubs = cache.setdefault("player_clubs", {})
     for pid, (name, women) in seen.items():
@@ -548,7 +576,9 @@ def main():
     # the history (e.g. on the very first run) are fetched, so the weekly
     # summary is complete.
     history = load_history()
-    players, not_followed = check_national_team_players(players, teams, history, cache)
+    national_team = load_national_team_players()
+    remember_national_team_players(national_team, history, center)
+    players, not_followed = check_national_team_players(players, teams, national_team, cache)
     covered = set(history["days_covered"])
     missing = [center - timedelta(days=n) for n in range(1, HISTORY_DAYS + 1)
                if (center - timedelta(days=n)).isoformat() not in covered]
@@ -576,6 +606,7 @@ def main():
     save_player_page_data(players, not_followed, cache)
     save_cache(cache)
     update_history(history, fetched, fetch_days, center)
+    remember_national_team_players(national_team, history, center)   # for the next run
     save_player_calendars(players, matches)
 
     # Print a readable summary in the Terminal.
