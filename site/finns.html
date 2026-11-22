@@ -118,13 +118,15 @@ function nextMatch(playerId) {
     .sort((a, b) => (a.date_fi + a.kickoff_fi).localeCompare(b.date_fi + b.kickoff_fi))[0];
 }
 
-function nextText(m, club) {
+// `home` and `away` are club names. A match in the coming week comes from
+// matches.json; a later one from the player's "later" in players.json.
+function nextText(date_fi, kickoff_fi, home, away, club) {
   const today = todayInFinland();
-  const d = new Date(m.date_fi + "T12:00:00");
-  const when = m.date_fi === today ? t("today") + " " + clockTime(m.kickoff_fi)
+  const d = new Date(date_fi + "T12:00:00");
+  const when = date_fi === today ? t("today") + " " + clockTime(kickoff_fi)
     : weekdayName(d) + " " + d.getDate() + "." + (d.getMonth() + 1) + ".";
-  const opponent = m.home.name === club ? m.away.name : m.home.name;
-  return { text: t("next") + " " + when + " vs " + opponent, soon: m.date_fi === today };
+  const opponent = home === club ? away : home;
+  return { text: t("next") + " " + when + " vs " + opponent, soon: date_fi === today };
 }
 
 function playerItem(p) {
@@ -133,10 +135,10 @@ function playerItem(p) {
   li.append(starButton(p.id, p.name), info);
   info.append(el("span", "name", p.name), el("span", "club", p.club));
   const m = nextMatch(p.id);
-  if (m) {
-    const n = nextText(m, p.club);
-    info.append(el("span", "next" + (n.soon ? " soon" : ""), n.text));
-  }
+  const n = m ? nextText(m.date_fi, m.kickoff_fi, m.home.name, m.away.name, p.club)
+    : p.later ? nextText(p.later.date_fi, p.later.kickoff_fi, p.later.home, p.later.away, p.club)
+    : null;
+  if (n) info.append(el("span", "next" + (n.soon ? " soon" : ""), n.text));
   info.append(calendarLinks(p));
   return li;
 }

@@ -12,8 +12,6 @@ Write ideas down as soon as they come up, even half-formed ones.
 - **More men's leagues** – Poland (Håkans) and Czechia (Mahuta) are missing from the data
   source; look for another free source, or check if more leagues have been added.
 - **WSL broadcaster in Finland** – not confirmed yet; check Viaplay / Disney+ / others.
-- **Further-ahead fixtures** – show or add to calendar matches beyond 7 days
-  (e.g. each followed player's club schedule). Would also make calendar subscriptions more useful.
 - **Player page** – one player's recent matches, goals and next games.
 - **Share a single match or player** – e.g. "Pohjanpalo scored twice" as its own picture.
 - **Notifications** ("your player is in the starting lineup") – needs a server or push
@@ -49,3 +47,4 @@ Write ideas down as soon as they come up, even half-formed ones.
 - Calendar subscription per player ("Subscribe in calendar" on the All Finns page; .ics files in English, updated 4× a day).
 - Fewer requests to ESPN: past days from the history, cached league names and club lookups, no run for notes-only pushes (~710 → ~500 per run).
 - National team players are remembered for a year, so players missing from squad lists (Leo Walta) stay found between international windows.
+- Further-ahead fixtures: club league fixtures to the end of the season in calendar subscriptions and the All Finns "Next:" line (fetched once a day).

@@ -95,6 +95,32 @@ def matches_on(league, day):
     return matches
 
 
+def team_fixtures(league, team_id):
+    """A club's upcoming league matches, to the end of the season.
+
+    Far-off kickoff times are often placeholders until the league sets them;
+    "time_tbc" is then True and only the date can be trusted.
+    The IDs are the same as in matches_on(), so a match is never doubled.
+    """
+    data = get_json(f"{BASE_URL}{league}/teams/{team_id}/schedule?fixture=true")
+    fixtures = []
+    for event in data.get("events", []):
+        comp = event["competitions"][0]
+        teams = {c["homeAway"]: {"id": c["team"]["id"], "name": c["team"]["displayName"]}
+                 for c in comp["competitors"]}
+        if comp["status"]["type"]["state"] != "pre" or set(teams) != {"home", "away"}:
+            continue   # started or finished: the daily scan has those
+        fixtures.append({
+            "id": event["id"],
+            "league": league,
+            "kickoff_utc": event["date"],
+            "time_tbc": comp.get("timeValid") is False,
+            "home": teams["home"],
+            "away": teams["away"],
+        })
+    return fixtures
+
+
 def league_name(league):
     """The league's readable name, e.g. "eng.2" -> "English League Championship"."""
     data = get_json(f"{BASE_URL}{league}/scoreboard")

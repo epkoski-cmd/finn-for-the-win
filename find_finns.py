@@ -378,6 +378,63 @@ def find_matches(players, finnish_days):
 
 
 # ---------------------------------------------------------------------------
+# Later matches: each club's fixture list, to the end of the season
+# ---------------------------------------------------------------------------
+# The daily scan above covers the next week, cups and national team matches
+# included. Beyond that we use each club's league fixture list: one request
+# per club with Finns (~55). Fixtures change slowly, so the lists are fetched
+# once a day and remembered in the player list's cache.
+
+def find_later_fixtures(players, cache, today, after_day):
+    """League matches of the Finns' clubs after `after_day` (the last day of
+    the daily scan), with the Finns filled in like in find_matches()."""
+    clubs = sorted({(p["team_id"], p["league"]) for p in players})
+    stored = cache.get("fixtures")
+    if not stored or stored["date"] != today.isoformat():
+        stored = cache["fixtures"] = {"date": today.isoformat(), "by_club": {}}
+    by_club = stored["by_club"]
+    missing = [c for c in clubs if "|".join(c) not in by_club]
+
+    def fetch(club):
+        try:
+            return club, espn.team_fixtures(club[1], club[0])
+        except Exception:
+            return club, None   # failed: try again on the next run
+    if missing:
+        with ThreadPoolExecutor(PARALLEL_REQUESTS) as pool:
+            for club, fixtures in pool.map(fetch, missing):
+                if fixtures is not None:
+                    by_club["|".join(club)] = fixtures
+        print(f"Fetched the fixture lists of {len(missing)} clubs.")
+
+    finns_by_team = {}
+    for p in players:
+        finns_by_team.setdefault(p["team_id"], []).append(p)
+    names = cache.get("league_names", {})
+    found = {}
+    for club in clubs:
+        for f in by_club.get("|".join(club), []):
+            m = json.loads(json.dumps(f))   # a copy, so the cache stays as it was
+            kickoff_utc = parse_utc(m["kickoff_utc"])
+            kickoff_fi = finnish_time(kickoff_utc)
+            # A placeholder time could push the Finnish date over midnight,
+            # so for unconfirmed times we trust only the date itself.
+            day = kickoff_utc.date() if m["time_tbc"] else kickoff_fi.date()
+            if day <= after_day:
+                continue
+            m["date_fi"] = day.isoformat()
+            m["kickoff_fi"] = kickoff_fi.strftime("%H:%M")
+            m["league_name"] = names.get(m["league"], m["league"])
+            m["national_team"] = False
+            m["women"] = m["league"] in WOMEN_COMPETITIONS
+            for side in ("home", "away"):
+                m[side]["finns"] = [{"id": p["id"], "name": p["name"]}
+                                    for p in finns_by_team.get(m[side]["id"], [])]
+            found[m["id"]] = m
+    return sorted(found.values(), key=lambda m: m["kickoff_utc"])
+
+
+# ---------------------------------------------------------------------------
 # Step 4: where to watch in Finland
 # ---------------------------------------------------------------------------
 
@@ -396,15 +453,29 @@ def add_streaming_info(matches):
             m["watch"] = table["competitions"].get(m["league"])   # None if unknown
 
 
-def save_player_page_data(players, not_followed, cache):
-    """Save the player list for the website's "All Finns" page, grouped by
-    league in the same order as ALL_LEAGUES (England first, and so on)."""
-    codes = sorted({p["league"] for p in players},
-                   key=lambda lg: ALL_LEAGUES.index(lg) if lg in ALL_LEAGUES else 99)
+def fetch_league_names(players, cache):
+    """Make sure the cache has the readable name of every league with Finns."""
     names = cache.setdefault("league_names", {})
-    missing = [c for c in codes if c not in names]
+    missing = sorted({p["league"] for p in players} - set(names))
     with ThreadPoolExecutor(PARALLEL_REQUESTS) as pool:
         names.update(zip(missing, pool.map(espn.league_name, missing)))
+    return names
+
+
+def save_player_page_data(players, not_followed, names, later):
+    """Save the player list for the website's "All Finns" page, grouped by
+    league in the same order as ALL_LEAGUES (England first, and so on).
+    Each player also gets their first match after the coming week ("later"),
+    which the page shows when they have no match in the coming week."""
+    codes = sorted({p["league"] for p in players},
+                   key=lambda lg: ALL_LEAGUES.index(lg) if lg in ALL_LEAGUES else 99)
+    first_later = {}
+    for m in later:   # sorted by kickoff, so the first one found is the next
+        for side in ("home", "away"):
+            for f in m[side]["finns"]:
+                first_later.setdefault(f["id"], {
+                    "date_fi": m["date_fi"], "kickoff_fi": m["kickoff_fi"], "time_tbc": m["time_tbc"],
+                    "home": m["home"]["name"], "away": m["away"]["name"]})
     leagues = []
     for code in codes:
         in_league = sorted((p for p in players if p["league"] == code),
@@ -413,7 +484,8 @@ def save_player_page_data(players, not_followed, cache):
             "league": code,
             "name": names[code],
             "women": code in WOMEN_COMPETITIONS,
-            "players": [{"id": p["id"], "name": p["name"], "club": p["team_name"]} for p in in_league],
+            "players": [{"id": p["id"], "name": p["name"], "club": p["team_name"],
+                         "later": first_later.get(p["id"])} for p in in_league],
         })
     PLAYERS_PAGE_FILE.write_text(json.dumps(
         {"generated": datetime.now(timezone.utc).isoformat(), "leagues": leagues,
@@ -495,9 +567,11 @@ def ics_fold(line):
 
 
 def ics_event(m, stamp):
-    start = parse_utc(m["kickoff_utc"])
-    end = start + timedelta(minutes=MATCH_LENGTH_MINUTES)
-    title = f"⚽ {m['home']['name']} – {m['away']['name']}"
+    """One match as a calendar event. A match whose kickoff time isn't set
+    yet becomes an all-day event marked "time TBC"; once the time is set,
+    the same event (same UID) turns into a normal one."""
+    tbc = m.get("time_tbc", False)
+    title = f"⚽ {m['home']['name']} – {m['away']['name']}" + (" (time TBC)" if tbc else "")
     finns = [f"{f['name']} ({side['name']})" for side in (m["home"], m["away"]) for f in side["finns"]]
     lines = [m["league_name"]]
     if finns and not m["national_team"]:
@@ -505,15 +579,29 @@ def ics_event(m, stamp):
     if m.get("watch"):
         lines.append("Watch in Finland: " + m["watch"]["service"]
                      + (" " + m["watch"]["url"] if m["watch"].get("url") else ""))
+    if tbc:
+        lines.append("Kickoff time not confirmed yet.")
     lines.append("From Finn for the Win: " + SITE_URL)
-    return [
+    event = [
         "BEGIN:VEVENT",
         f"UID:{m['id']}@finn-for-the-win",
         "DTSTAMP:" + stamp,
-        "DTSTART:" + ics_time(start),
-        "DTEND:" + ics_time(end),
+    ]
+    if tbc:
+        day = date.fromisoformat(m["date_fi"])
+        event += ["DTSTART;VALUE=DATE:" + day.strftime("%Y%m%d"),
+                  "DTEND;VALUE=DATE:" + (day + timedelta(days=1)).strftime("%Y%m%d")]
+    else:
+        start = parse_utc(m["kickoff_utc"])
+        event += ["DTSTART:" + ics_time(start),
+                  "DTEND:" + ics_time(start + timedelta(minutes=MATCH_LENGTH_MINUTES))]
+    event += [
         "SUMMARY:" + ics_text(title),
         "DESCRIPTION:" + ics_text("\n".join(lines)),
+    ]
+    if tbc:   # no reminder for a time we don't know
+        return event + ["END:VEVENT"]
+    return event + [
         "BEGIN:VALARM",
         "ACTION:DISPLAY",
         "DESCRIPTION:" + ics_text(title),
@@ -525,7 +613,8 @@ def ics_event(m, stamp):
 
 def save_player_calendars(players, matches):
     """Write calendars/<player id>.ics for every player we follow, with their
-    matches in the data (a few past days and the next week). A player with no
+    matches in the data (a few past days, the next week, and their club's
+    league matches after that to the end of the season). A player with no
     matches gets an empty calendar, so the subscription keeps working."""
     CALENDAR_DIR.mkdir(parents=True, exist_ok=True)
     for old in CALENDAR_DIR.glob("*.ics"):   # players who left the list disappear
@@ -603,11 +692,14 @@ def main():
          "days": [d.isoformat() for d in days],
          "matches": matches},
         ensure_ascii=False, indent=2))
-    save_player_page_data(players, not_followed, cache)
+    names = fetch_league_names(players, cache)
+    later = find_later_fixtures(players, cache, center, days[-1])
+    add_streaming_info(later)
+    save_player_page_data(players, not_followed, names, later)
     save_cache(cache)
     update_history(history, fetched, fetch_days, center)
     remember_national_team_players(national_team, history, center)   # for the next run
-    save_player_calendars(players, matches)
+    save_player_calendars(players, matches + later)
 
     # Print a readable summary in the Terminal.
     print(f"\n{len(matches)} matches with Finns, {days[0]} to {days[-1]} (Finnish time):")
