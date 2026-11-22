@@ -24,7 +24,7 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `espn.py` | Every request to ESPN lives here. If ESPN changes, only this file needs fixing. |
 | `find_finns.py` | The main script: finds Finnish players, their matches and lineups, and saves the result. |
 | `streaming_fi.json` | Edited by hand: where each competition can be watched in Finland. Check it once a season. |
-| `data/finnish_players.json` | The saved list of Finnish players (rebuilt automatically once a week). |
+| `data/finnish_players.json` | The saved list of Finnish players (rebuilt automatically once a week, and daily during transfer windows: January to early February, mid-June to early September). |
 | `data/matches.json` | The result: matches with Finns, which the website will read. |
 | `data/players.json` | Every Finn we follow, grouped by league, for the website's "All Finns" page. |
 | `data/history.json` | Finished matches from the last two weeks, for the weekly summary. Kept on the live site between runs. |

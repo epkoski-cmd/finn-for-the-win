@@ -53,7 +53,7 @@ Ideas and next steps live in `IDEAS.md`. File-by-file overview in `README.md`.
   - the data source's "day" is US time → also fetch the day before
 - **Python 3.8 locally, 3.12 on GitHub:** standard library only, no `zoneinfo`.
 - Raise `HISTORY_VERSION` when the history's contents change, so it rebuilds itself once.
-- Keep requests to the data source modest: cache the player list (weekly), keep parallel
+- Keep requests to the data source modest: cache the player list (weekly; daily in transfer windows), keep parallel
   requests at 6, and don't add per-visitor requests (visitors only read saved files).
 
 ## How we work

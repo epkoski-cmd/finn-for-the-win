@@ -43,7 +43,8 @@ jobs:
           python-version: "3.12"
 
       # The list of Finnish players takes ~550 requests to build, so we keep
-      # it between runs. find_finns.py rebuilds it by itself once it's a week old.
+      # it between runs. find_finns.py rebuilds it by itself once it's a week old
+      # (a day old during transfer windows).
       - name: Reuse this week's player list
         uses: actions/cache@v6
         with:

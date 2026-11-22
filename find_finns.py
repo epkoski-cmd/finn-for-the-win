@@ -9,7 +9,8 @@ Run it from the Terminal, inside the finns-today folder:
 What it does, step by step:
   1. Make a list of Finnish players: look through every squad in our leagues
      and keep players whose citizenship is "Finland". Squads change slowly,
-     so the list is saved and only rebuilt once a week.
+     so the list is saved and only rebuilt once a week (daily during
+     transfer windows, when players change clubs).
   2. Fetch every match in our leagues for the chosen days, and keep only
      the matches where a team has a Finn in its squad.
   3. For matches that have started or finished, check the lineups:
@@ -101,7 +102,12 @@ FINLAND_TEAM_IDS = {FINLAND_TEAM_ID, FINLAND_WOMEN_TEAM_ID}
 
 DAYS_BEFORE = 3            # how many past days to include (for final scores)
 DAYS_AFTER = 7             # how many days ahead to include (upcoming matches)
-PLAYER_LIST_MAX_AGE = 7    # days before the Finnish player list is rebuilt
+PLAYER_LIST_MAX_AGE = 7    # days before the Finnish player list is rebuilt...
+PLAYER_LIST_MAX_AGE_TRANSFERS = 1   # ...but daily during transfer windows, when Finns change clubs
+# Transfer windows as (month, day) from-to, both days included. Most European
+# windows run in January and from mid-June to the start of September; the
+# end dates have a few extra days for late deals and slow data updates.
+TRANSFER_WINDOWS = [((1, 1), (2, 10)), ((6, 15), (9, 10))]
 PARALLEL_REQUESTS = 6      # how many requests to ESPN we make at the same time
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -147,13 +153,20 @@ def parse_utc(text):
 # Step 1: the list of Finnish players
 # ---------------------------------------------------------------------------
 
+def in_transfer_window(day):
+    """True if the day falls in one of the TRANSFER_WINDOWS."""
+    return any(start <= (day.month, day.day) <= end for start, end in TRANSFER_WINDOWS)
+
+
 def load_finnish_players():
     """Return the saved player list, or rebuild it if missing or too old."""
+    today = datetime.now(timezone.utc).date()
+    max_age = PLAYER_LIST_MAX_AGE_TRANSFERS if in_transfer_window(today) else PLAYER_LIST_MAX_AGE
     if PLAYERS_FILE.exists():
         saved = json.loads(PLAYERS_FILE.read_text())
         age = datetime.now(timezone.utc) - datetime.fromisoformat(saved["updated"])
         # (A list saved before women's leagues were added is rebuilt.)
-        if age.days < PLAYER_LIST_MAX_AGE and "teams" in saved and all("women" in p for p in saved["players"]):
+        if age.days < max_age and "teams" in saved and all("women" in p for p in saved["players"]):
             print(f"Using saved list of {len(saved['players'])} Finnish players.")
             return saved["players"], saved["teams"]
 

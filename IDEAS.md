@@ -13,7 +13,6 @@ Write ideas down as soon as they come up, even half-formed ones.
 - **More men's leagues** – Poland (Håkans) and Czechia (Mahuta) are missing from the data
   source; look for another free source, or check if more leagues have been added.
 - **WSL broadcaster in Finland** – not confirmed yet; check Viaplay / Disney+ / others.
-- **Transfer windows** – rebuild the player list daily in January and summer instead of weekly.
 - **Further-ahead fixtures** – show or add to calendar matches beyond 7 days
   (e.g. each followed player's club schedule).
 - **Calendar subscription per player** – a calendar link that updates by itself.
@@ -48,3 +47,4 @@ Write ideas down as soon as they come up, even half-formed ones.
 - GitHub Actions updated to current versions; workflow split into build + publish jobs
   (fixes the occasional "No artifacts named github-pages" failure).
 - Finnish league names in the Finnish view ("Saksan 2. Bundesliga"), table in `texts.js`.
+- Player list rebuilt daily during transfer windows (1.1.–10.2. and 15.6.–10.9.), weekly otherwise.
