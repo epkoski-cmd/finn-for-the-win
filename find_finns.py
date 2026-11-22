@@ -129,8 +129,9 @@ CALENDAR_DIR = DATA_DIR / "calendars"            # one calendar file per player,
 SITE_URL = "https://epkoski-cmd.github.io/finn-for-the-win/"
 HISTORY_DAYS = 7           # the weekly summary covers this many past days
 HISTORY_KEEP = 14          # days of history kept in the file (older ones are dropped)
-HISTORY_VERSION = 2        # raise this when the history's contents change; it's then rebuilt
-                           # (2 = women's football added)
+HISTORY_VERSION = 3        # raise this when the history's contents change; it's then rebuilt
+                           # (2 = women's football added, 3 = kickoff_utc, state and
+                           # status_text kept, so past days can be shown from the history)
 
 
 # ---------------------------------------------------------------------------
@@ -215,6 +216,22 @@ def load_finnish_players():
     return players, team_table
 
 
+# Things that rarely change (league names, national team players' clubs) are
+# remembered in the saved player list's "cache", so we don't ask ESPN again
+# on every run. The cache starts empty whenever the list is rebuilt (weekly).
+
+def load_cache():
+    if PLAYERS_FILE.exists():
+        return json.loads(PLAYERS_FILE.read_text()).get("cache", {})
+    return {}
+
+
+def save_cache(cache):
+    saved = json.loads(PLAYERS_FILE.read_text())
+    saved["cache"] = cache
+    PLAYERS_FILE.write_text(json.dumps(saved, ensure_ascii=False, indent=2))
+
+
 def drop_wrong_clubs(players):
     """Remove the squad listings named in WRONG_CLUBS."""
     kept = [p for p in players if WRONG_CLUBS.get(p["id"]) != p["team_id"]]
@@ -224,7 +241,7 @@ def drop_wrong_clubs(players):
     return kept
 
 
-def check_national_team_players(players, teams, history):
+def check_national_team_players(players, teams, history, cache):
     """Players who played for Finland (in the saved history) but aren't in
     our list. Squad lists sometimes miss a player (e.g. Leo Walta at LAFC in
     2026), so we look up each one's club directly:
@@ -242,11 +259,14 @@ def check_national_team_players(players, teams, history):
                         if f["id"] not in known:
                             seen[f["id"]] = (f["name"], m.get("women", False))
     added, not_followed = [], []
+    known_clubs = cache.setdefault("player_clubs", {})
     for pid, (name, women) in seen.items():
-        try:
-            club = espn.player_club(pid)
-        except Exception:
-            continue   # lookup failed: try again on the next run
+        if pid not in known_clubs:
+            try:
+                known_clubs[pid] = espn.player_club(pid)
+            except Exception:
+                continue   # lookup failed: try again on the next run
+        club = known_clubs[pid]
         if club["id"] in teams:
             team = teams[club["id"]]
             added.append({"id": pid, "name": name, "team_id": club["id"], "team_name": team["name"],
@@ -270,7 +290,7 @@ def find_matches(players, finnish_days):
 
     # ESPN's days follow US time, so to cover a full Finnish day we also
     # need the US day before it (late US evening = next morning in Finland).
-    espn_days = [finnish_days[0] - timedelta(days=1)] + finnish_days
+    espn_days = sorted(set(finnish_days) | {d - timedelta(days=1) for d in finnish_days})
     competitions = (DOMESTIC_LEAGUES + CUPS + NATIONAL_TEAM_COMPS
                     + WOMEN_LEAGUES + WOMEN_CUPS + WOMEN_NATIONAL_TEAM_COMPS)
     requests = [(lg, d) for lg in competitions for d in espn_days]
@@ -348,13 +368,15 @@ def add_streaming_info(matches):
             m["watch"] = table["competitions"].get(m["league"])   # None if unknown
 
 
-def save_player_page_data(players, not_followed):
+def save_player_page_data(players, not_followed, cache):
     """Save the player list for the website's "All Finns" page, grouped by
     league in the same order as ALL_LEAGUES (England first, and so on)."""
     codes = sorted({p["league"] for p in players},
                    key=lambda lg: ALL_LEAGUES.index(lg) if lg in ALL_LEAGUES else 99)
+    names = cache.setdefault("league_names", {})
+    missing = [c for c in codes if c not in names]
     with ThreadPoolExecutor(PARALLEL_REQUESTS) as pool:
-        names = dict(zip(codes, pool.map(espn.league_name, codes)))
+        names.update(zip(missing, pool.map(espn.league_name, missing)))
     leagues = []
     for code in codes:
         in_league = sorted((p for p in players if p["league"] == code),
@@ -394,7 +416,8 @@ def update_history(history, matches, fetched_days, today):
     for m in matches:
         if m["state"] == "post":
             by_id[m["id"]] = {k: m[k] for k in (
-                "id", "league", "league_name", "national_team", "women", "date_fi", "kickoff_fi", "home", "away")}
+                "id", "league", "league_name", "national_team", "women", "date_fi", "kickoff_fi",
+                "kickoff_utc", "state", "status_text", "home", "away")}
     covered = set(history["days_covered"]) | {d.isoformat() for d in fetched_days if d < today}
     oldest = (today - timedelta(days=HISTORY_KEEP)).isoformat()
     history["days_covered"] = sorted(d for d in covered if d >= oldest)
@@ -517,21 +540,31 @@ def main():
 
     players, teams = load_finnish_players()
     players = drop_wrong_clubs(players)
+    cache = load_cache()
 
-    # Past days missing from the history (e.g. on the very first run) are
-    # fetched too, so the weekly summary is complete. Normally none are.
+    # Past days already in the history ("covered") aren't asked again: their
+    # matches are finished and saved there. Normally that's every past day
+    # except yesterday on the first run of the day. Past days missing from
+    # the history (e.g. on the very first run) are fetched, so the weekly
+    # summary is complete.
     history = load_history()
-    players, not_followed = check_national_team_players(players, teams, history)
+    players, not_followed = check_national_team_players(players, teams, history, cache)
+    covered = set(history["days_covered"])
     missing = [center - timedelta(days=n) for n in range(1, HISTORY_DAYS + 1)
-               if (center - timedelta(days=n)).isoformat() not in history["days_covered"]]
+               if (center - timedelta(days=n)).isoformat() not in covered]
     start = min([days[0]] + missing)
     fetch_days = [start + timedelta(days=n) for n in range((days[-1] - start).days + 1)]
+    fetch_days = [d for d in fetch_days if d.isoformat() not in covered]
     if missing:
         print(f"Also fetching {len(missing)} past day(s) for the weekly summary.")
 
     fetched = find_matches(players, fetch_days)
     window = {d.isoformat() for d in days}
     matches = [m for m in fetched if m["date_fi"] in window]
+    fetched_ids = {m["id"] for m in matches}
+    from_history = [dict(m) for m in history["matches"]
+                    if m["date_fi"] in window and m["date_fi"] in covered and m["id"] not in fetched_ids]
+    matches = sorted(matches + from_history, key=lambda m: m["kickoff_utc"])
     add_streaming_info(matches)
 
     DATA_DIR.mkdir(exist_ok=True)
@@ -540,7 +573,8 @@ def main():
          "days": [d.isoformat() for d in days],
          "matches": matches},
         ensure_ascii=False, indent=2))
-    save_player_page_data(players, not_followed)
+    save_player_page_data(players, not_followed, cache)
+    save_cache(cache)
     update_history(history, fetched, fetch_days, center)
     save_player_calendars(players, matches)
 

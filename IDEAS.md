@@ -47,3 +47,4 @@ Write ideas down as soon as they come up, even half-formed ones.
 - Finnish league names in the Finnish view ("Saksan 2. Bundesliga"), table in `texts.js`.
 - Player list rebuilt daily during transfer windows (1.1.–10.2. and 15.6.–10.9.), weekly otherwise.
 - Calendar subscription per player ("Subscribe in calendar" on the All Finns page; .ics files in English, updated 4× a day).
+- Fewer requests to ESPN: past days from the history, cached league names and club lookups, no run for notes-only pushes (~710 → ~500 per run).

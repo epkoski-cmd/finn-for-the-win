@@ -11,7 +11,9 @@ on:
     - cron: "0 4,10,16,22 * * *"
   workflow_dispatch:      # adds a "Run workflow" button on GitHub, for running it by hand
   push:
-    branches: [main]      # also run whenever new code is uploaded
+    branches: [main]      # also run whenever new code is uploaded...
+    paths-ignore:         # ...except when only notes change (IDEAS.md, README.md etc.):
+      - "**.md"           # they aren't part of the site, so no need to ask ESPN again
 
 # Permissions this workflow needs: read the code, publish to GitHub Pages
 # (pages + id-token), and find the packaged site between the two jobs (actions).

@@ -41,6 +41,22 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `site/untracked.json` | Edited by hand: Finnish players in leagues we can't follow (e.g. Damallsvenskan), shown on the All Finns page. |
 | `site/texts.js` | Every text on the site in Finnish and English. Edit wordings here. At the end, `LEAGUE_NAMES_FI`: Finnish league names by league code (English shows the data source's name). |
 
+## Requests to the data source
+
+We try to ask ESPN as little as possible. A normal run makes about **500 requests**:
+
+| What | Per run |
+|---|---|
+| Matches per competition and day: 54 competitions × 9 days (today, the next 7 days, plus the US day before) | 486 |
+| Lineups and goals for today's started matches | 10–40 |
+
+- Past days are taken from the history once they've been fetched after they end (normally on the day's first run).
+- League names and national team players' clubs are remembered in the player list's `cache` until the weekly rebuild.
+- The player list rebuild is about 700 requests: weekly, or daily during transfer windows.
+- The update runs 4× a day, plus on every push, except pushes that only change `.md` files (IDEAS.md, README.md…).
+
+So a normal day is about 2,150 requests (until 2026-11-22 it was about 2,950).
+
 ## Running it
 
 Open the Terminal, go to this folder, and run:
