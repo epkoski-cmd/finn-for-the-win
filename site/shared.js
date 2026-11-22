@@ -169,6 +169,12 @@ const FINLAND_TEAM_IDS = ["458", "7536"];
 function finlandSide(m) {
   return FINLAND_TEAM_IDS.includes(m.home.id) ? m.home : m.away;
 }
+// A league's name in the chosen language: the Finnish name from texts.js,
+// or the data source's English name if there's none (or the site is in English).
+function leagueName(code, englishName) {
+  return (lang === "fi" && LEAGUE_NAMES_FI[code]) || englishName;
+}
+
 function nationalTeamName(isWomen) {
   return t(isWomen ? "nationalTeamWomen" : "nationalTeam");
 }
@@ -267,7 +273,7 @@ function icsEvent(m) {
   // so you know which side to cheer for without looking it up.
   const finns = [m.home, m.away].flatMap(s => s.finns.map(f => f.name + " (" + s.name + ")"));
   const title = "⚽ " + m.home.name + " – " + m.away.name;
-  const lines = [m.league_name];
+  const lines = [leagueName(m.league, m.league_name)];
   if (finns.length && !m.national_team) lines.push(t("calFinns") + finns.join(", "));
   if (m.watch) lines.push(t("calWatch") + m.watch.service + (m.watch.url ? " " + m.watch.url : ""));
   lines.push(t("calFrom") + location.origin + location.pathname.replace(/[^/]*$/, ""));

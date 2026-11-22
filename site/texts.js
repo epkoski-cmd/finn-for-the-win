@@ -243,3 +243,69 @@ const TEXTS = {
     shareFooter: "Finnish footballers abroad, and where to watch:",
   },
 };
+
+// League and cup names in Finnish, by the data source's league code.
+// In English the site shows the data source's own name. A league that's
+// missing here also shows the English name, so a new league never breaks
+// anything; just add its Finnish name when you notice it.
+// The codes are listed in find_finns.py (DOMESTIC_LEAGUES etc.).
+const LEAGUE_NAMES_FI = {
+  // Men's leagues
+  "eng.1": "Englannin Valioliiga",
+  "eng.2": "Englannin Championship",
+  "eng.3": "Englannin League One",
+  "eng.4": "Englannin League Two",
+  "esp.1": "Espanjan LaLiga",
+  "esp.2": "Espanjan LaLiga 2",
+  "ger.1": "Saksan Bundesliga",
+  "ger.2": "Saksan 2. Bundesliga",
+  "ita.1": "Italian Serie A",
+  "ita.2": "Italian Serie B",
+  "fra.1": "Ranskan Ligue 1",
+  "fra.2": "Ranskan Ligue 2",
+  "ned.1": "Hollannin Eredivisie",
+  "ned.2": "Hollannin Eerste Divisie",
+  "bel.1": "Belgian Pro League",
+  "por.1": "Portugalin Primeira Liga",
+  "sco.1": "Skotlannin Valioliiga",
+  "sco.2": "Skotlannin Championship",
+  "tur.1": "Turkin Süper Lig",
+  "gre.1": "Kreikan Super League",
+  "aut.1": "Itävallan Bundesliga",
+  "sui.1": "Sveitsin Super League",
+  "den.1": "Tanskan Superliiga",
+  "nor.1": "Norjan Eliteserien",
+  "swe.1": "Ruotsin Allsvenskan",
+  "usa.1": "Yhdysvaltain MLS",
+  "usa.usl.1": "Yhdysvaltain USL Championship",
+  "ksa.1": "Saudi-Arabian Pro League",
+  "jpn.1": "Japanin J.League",
+  "aus.1": "Australian A-League (miehet)",
+  // Men's cups and national team competitions
+  "uefa.champions": "Mestarien liiga",
+  "uefa.europa": "Eurooppa-liiga",
+  "uefa.europa.conf": "Konferenssiliiga",
+  "uefa.nations": "Kansojen liiga",
+  "fifa.worldq.uefa": "MM-karsinnat",
+  "uefa.euroq": "EM-karsinnat",
+  "fifa.world": "MM-kisat",
+  "uefa.euro": "EM-kisat",
+  "fifa.friendly": "Ystävyysottelu",
+  // Women's leagues
+  "eng.w.1": "Englannin naisten Super League",
+  "esp.w.1": "Espanjan Liga F",
+  "fra.w.1": "Ranskan Première Ligue",
+  "ned.w.1": "Hollannin naisten Eredivisie",
+  "usa.nwsl": "Yhdysvaltain NWSL",
+  "usa.w.usl.1": "Yhdysvaltain USL Super League",
+  "can.w.nsl": "Kanadan Northern Super League",
+  "aus.w.1": "Australian A-League (naiset)",
+  "mex.w.1": "Meksikon Liga MX Femenil",
+  // Women's cups and national team competitions
+  "uefa.wchampions": "Naisten Mestarien liiga",
+  "fifa.wworldq.uefa": "Naisten MM-karsinnat",
+  "uefa.w.nations": "Naisten Kansojen liiga",
+  "uefa.weuro": "Naisten EM-kisat",
+  "fifa.wwc": "Naisten MM-kisat",
+  "fifa.friendly.w": "Naisten ystävyysottelu",
+};

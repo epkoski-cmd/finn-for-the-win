@@ -4,8 +4,6 @@ A running list. Pick one per session; move it to **Done** when it's live.
 Write ideas down as soon as they come up, even half-formed ones.
 
 ## Next
-- **Finnish league names** – "Saksan 2. Bundesliga" instead of "German 2. Bundesliga"
-  in the Finnish view. A small name table in `texts.js`.
 
 
 ## Maybe later
@@ -49,3 +47,4 @@ Write ideas down as soon as they come up, even half-formed ones.
 - Calendar events show each Finn's club, e.g. "Kallman (Hannover 96)".
 - GitHub Actions updated to current versions; workflow split into build + publish jobs
   (fixes the occasional "No artifacts named github-pages" failure).
+- Finnish league names in the Finnish view ("Saksan 2. Bundesliga"), table in `texts.js`.

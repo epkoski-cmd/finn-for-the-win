@@ -35,6 +35,8 @@ Ideas and next steps live in `IDEAS.md`. File-by-file overview in `README.md`.
 
 ## Rules learned the hard way
 - **Every visible text goes in `texts.js`, in both Finnish and English.** Never hard-code UI text.
+- **Adding a league or cup in `find_finns.py`? Add its Finnish name to `LEAGUE_NAMES_FI`** in `texts.js`
+  (shown with `leagueName()`). Without it, the Finnish view falls back to the English name.
 - **Link new CSS/JS files with `?v=__VERSION__`.** The workflow replaces it with the commit
   version, so browsers never mix old and new files. Open tabs reload via `version.json`.
 - Insert data with `textContent` (the `el()` helper), never `innerHTML`.

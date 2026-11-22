@@ -165,7 +165,7 @@ function matchCard(m) {
 
   // Competition + teams + score
   const comp = el("div", m.national_team ? "nt-flag" : "comp",
-    m.national_team ? nationalTeamName(m.women) + " · " + m.league_name : m.league_name);
+    m.national_team ? nationalTeamName(m.women) + " · " + leagueName(m.league, m.league_name) : leagueName(m.league, m.league_name));
   // When men's and women's matches are mixed, women's get a small tag.
   if (m.women && gender === "all") comp.prepend(el("span", "tag-w", t("womenTag")));
   const teams = el("div", "teams");

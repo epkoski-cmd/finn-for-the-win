@@ -33,6 +33,7 @@ import espn
 # ---------------------------------------------------------------------------
 
 # League codes ESPN uses. "esp.1" = Spain's top division, "esp.2" = second, etc.
+# New league or cup? Also add its Finnish name to LEAGUE_NAMES_FI in site/texts.js.
 DOMESTIC_LEAGUES = [
     "eng.1", "eng.2", "eng.3", "eng.4",   # England
     "esp.1", "esp.2",                     # Spain

@@ -156,7 +156,7 @@ function render() {
     const ul = el("ul", "results");
     for (const m of nt) {
       const li = el("li");
-      li.append(el("span", "res", resultText(m)), el("span", "when", m.league_name + " · " + shortDate(m.date_fi)));
+      li.append(el("span", "res", resultText(m)), el("span", "when", leagueName(m.league, m.league_name) + " · " + shortDate(m.date_fi)));
       ul.append(li);
     }
     box.append(ul);

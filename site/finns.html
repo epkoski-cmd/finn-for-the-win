@@ -157,11 +157,11 @@ function render() {
   let shown = 0;
 
   for (const league of leagues.filter(l => showsGender(l.women))) {
-    const players = league.players.filter(p => matchesSearch(text, p.name, p.club, league.name));
+    const players = league.players.filter(p => matchesSearch(text, p.name, p.club, league.name, leagueName(league.league, league.name)));
     if (!players.length) continue;
     shown += players.length;
     const box = el("section", "league");
-    const h2 = el("h2", null, league.name);
+    const h2 = el("h2", null, leagueName(league.league, league.name));
     h2.append(el("span", "n", String(players.length)));
     const ul = el("ul", "finns");
     players.forEach(p => ul.append(playerItem(p)));
