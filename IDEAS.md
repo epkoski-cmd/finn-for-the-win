@@ -4,7 +4,12 @@ A running list. Pick one per session; move it to **Done** when it's live.
 Write ideas down as soon as they come up, even half-formed ones.
 
 ## Next
-
+- **Match of the day** – highlight one match a day: a Finn playing in the most prestigious league.
+  Needs a ranking of all our leagues together (English Premier League first). Open questions:
+  where cups (Champions League) and national team matches fit, does it matter if the Finn
+  actually plays (lineup), and men's and women's leagues in one ranking or two.
+- **My Finns on top** – show matches of the players I follow at the top of the day's list, not
+  just highlighted. Next to or below the match of the day.
 
 ## Maybe later
 - **Women's leagues we can't track yet** – find a free data source for Damallsvenskan,
