@@ -8,7 +8,6 @@ Write ideas down as soon as they come up, even half-formed ones.
   in the Finnish view. A small name table in `texts.js`.
 - **Housekeeping: update the GitHub Actions versions** – runs warn that Node 20 is being
   retired. Small change, but do it before it starts failing.
-- **Add name of the Finn's team to the calendar event description** – the user may not remember which teams the Finns pkay for
 
 
 ## Maybe later
@@ -49,3 +48,4 @@ Write ideas down as soon as they come up, even half-formed ones.
 - National team players missing from squad lists are found automatically (Leo Walta).
 - "Share this week as an image" button on the This week page (canvas picture, phone share menu).
 - Link preview pictures (`og:image`): a fixed one for the site, and the week's picture made 4× a day by headless Chrome.
+- Calendar events show each Finn's club, e.g. "Kallman (Hannover 96)".

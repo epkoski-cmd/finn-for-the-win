@@ -263,7 +263,9 @@ function icsText(text) {
 function icsEvent(m) {
   const start = new Date(m.kickoff_utc);
   const end = new Date(start.getTime() + MATCH_LENGTH_MINUTES * 60000);
-  const finns = [m.home, m.away].flatMap(s => s.finns.map(f => f.name));
+  // Each Finn with their club, e.g. "Niko Hamalainen (New Mexico United)",
+  // so you know which side to cheer for without looking it up.
+  const finns = [m.home, m.away].flatMap(s => s.finns.map(f => f.name + " (" + s.name + ")"));
   const title = "⚽ " + m.home.name + " – " + m.away.name;
   const lines = [m.league_name];
   if (finns.length && !m.national_team) lines.push(t("calFinns") + finns.join(", "));
