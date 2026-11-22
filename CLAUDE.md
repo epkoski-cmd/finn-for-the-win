@@ -47,6 +47,7 @@ Ideas and next steps live in `IDEAS.md`. File-by-file overview in `README.md`.
   Check that a link really opens the right page (Viaplay sends unknown addresses to its front page).
 - **The data source has errors.** Known ones and their fixes:
   - wrong citizenship → `EXTRA_FINNS`
+  - player listed at a club they don't play for → `WRONG_CLUBS`
   - player missing from a squad list → found through national team lineups automatically
   - Finnish club without a `fin.` code → `FINNISH_CLUBS_WITHOUT_CODE`
   - scoreboard date ranges fail → fetch one day at a time

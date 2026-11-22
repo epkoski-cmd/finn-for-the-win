@@ -73,6 +73,13 @@ EXTRA_FINNS = {
     "221227": "Fredrik Oldrup Jensen",   # listed as Norway (2026-11-18)
 }
 
+# Players the data source lists at a club they don't play for (besides their
+# real club). Player ID -> the wrong club's team ID; that listing is ignored.
+# The script prints a note when an entry is no longer needed.
+WRONG_CLUBS = {
+    "221227": "141",   # Fredrik Oldrup Jensen plays for Aris, also listed at NAC Breda (2026-11-22)
+}
+
 # Finnish clubs are recognised by their code starting with "fin.", e.g.
 # "fin.fc_inter_turku". A few clubs' codes don't, so they're listed here by ID.
 # National team players at these clubs aren't shown as "not followed yet".
@@ -206,6 +213,15 @@ def load_finnish_players():
         ensure_ascii=False, indent=2))
     print(f"Found {len(players)} Finnish players in {len(teams)} squads.")
     return players, team_table
+
+
+def drop_wrong_clubs(players):
+    """Remove the squad listings named in WRONG_CLUBS."""
+    kept = [p for p in players if WRONG_CLUBS.get(p["id"]) != p["team_id"]]
+    used = {p["id"] for p in players if WRONG_CLUBS.get(p["id"]) == p["team_id"]}
+    for pid in WRONG_CLUBS.keys() - used:
+        print(f"Note: WRONG_CLUBS entry {pid} is no longer needed; the data source has fixed it.")
+    return kept
 
 
 def check_national_team_players(players, teams, history):
@@ -500,6 +516,7 @@ def main():
     days = [center + timedelta(days=n) for n in range(-DAYS_BEFORE, DAYS_AFTER + 1)]
 
     players, teams = load_finnish_players()
+    players = drop_wrong_clubs(players)
 
     # Past days missing from the history (e.g. on the very first run) are
     # fetched too, so the weekly summary is complete. Normally none are.

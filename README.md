@@ -69,7 +69,8 @@ Later runs reuse the saved player list and are quicker.
 
 - ESPN's feeds are unofficial and could change without warning.
 - Squads are today's squads, so for old dates a player who has since moved clubs shows up wrong.
-- ESPN's data has some errors (e.g. one player listed at two clubs).
+- ESPN's data has some errors. A player listed at a club they don't play for (e.g. Fredrik Oldrup Jensen at NAC Breda
+  as well as Aris) is fixed by hand in `WRONG_CLUBS` in `find_finns.py`.
 - Not covered yet: domestic cups and some leagues (e.g. Poland, Nordic second tiers).
 - Women's football: the data source has the English, Spanish, French, Dutch, US, Canadian, Australian and Mexican leagues,
   the Women's Champions League and Helmarit, but not Sweden, Germany, Italy, Norway or Denmark, where many Finnish women play.
