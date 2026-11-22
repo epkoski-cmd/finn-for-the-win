@@ -19,6 +19,8 @@ What it does, step by step:
   5. Add finished matches to data/history.json, which the website's weekly
      summary reads. The history survives between runs: before each run, the
      automatic GitHub job downloads the published copy from the live site.
+  6. Write one calendar file per player (data/calendars/<id>.ics), for the
+     website's "Subscribe in calendar" links.
 """
 
 import json
@@ -116,6 +118,8 @@ PLAYERS_FILE = DATA_DIR / "finnish_players.json"
 MATCHES_FILE = DATA_DIR / "matches.json"
 PLAYERS_PAGE_FILE = DATA_DIR / "players.json"   # read by the website's "All Finns" page
 HISTORY_FILE = DATA_DIR / "history.json"         # finished matches, for the weekly summary
+CALENDAR_DIR = DATA_DIR / "calendars"            # one calendar file per player, for subscribing
+SITE_URL = "https://epkoski-cmd.github.io/finn-for-the-win/"
 HISTORY_DAYS = 7           # the weekly summary covers this many past days
 HISTORY_KEEP = 14          # days of history kept in the file (older ones are dropped)
 HISTORY_VERSION = 2        # raise this when the history's contents change; it's then rebuilt
@@ -385,6 +389,106 @@ def update_history(history, matches, fetched_days, today):
 
 
 # ---------------------------------------------------------------------------
+# Step 6: calendar subscriptions, one file per player
+# ---------------------------------------------------------------------------
+# A calendar app that subscribes to e.g. calendars/221227.ics checks the file
+# now and then, and shows whatever matches are in it. We rewrite the files on
+# every run, so new matches appear and changed kickoff times update by
+# themselves. The events are written the same way as the website's
+# "Add to calendar" button (shared.js), but always in English.
+
+MATCH_LENGTH_MINUTES = 120   # 90 minutes + half-time + stoppage time
+REMINDER_MINUTES = 30
+
+
+def ics_time(moment):
+    """A datetime -> "20261121T150000Z", the format .ics files use."""
+    return moment.astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def ics_text(text):
+    """Commas, semicolons and line breaks have special meanings in .ics text."""
+    return (str(text).replace("\\", "\\\\").replace(",", "\\,")
+            .replace(";", "\\;").replace("\n", "\\n"))
+
+
+def ics_fold(line):
+    """The format wants lines of at most 75 bytes; longer ones continue on
+    the next line, which starts with a space ("folding")."""
+    parts, current, size = [], "", 0
+    for ch in line:
+        n = len(ch.encode("utf-8"))
+        if size + n > (74 if parts else 75):
+            parts.append(current)
+            current, size = "", 0
+        current += ch
+        size += n
+    parts.append(current)
+    return "\r\n ".join(parts)
+
+
+def ics_event(m, stamp):
+    start = parse_utc(m["kickoff_utc"])
+    end = start + timedelta(minutes=MATCH_LENGTH_MINUTES)
+    title = f"⚽ {m['home']['name']} – {m['away']['name']}"
+    finns = [f"{f['name']} ({side['name']})" for side in (m["home"], m["away"]) for f in side["finns"]]
+    lines = [m["league_name"]]
+    if finns and not m["national_team"]:
+        lines.append("Finns: " + ", ".join(finns))
+    if m.get("watch"):
+        lines.append("Watch in Finland: " + m["watch"]["service"]
+                     + (" " + m["watch"]["url"] if m["watch"].get("url") else ""))
+    lines.append("From Finn for the Win: " + SITE_URL)
+    return [
+        "BEGIN:VEVENT",
+        f"UID:{m['id']}@finn-for-the-win",
+        "DTSTAMP:" + stamp,
+        "DTSTART:" + ics_time(start),
+        "DTEND:" + ics_time(end),
+        "SUMMARY:" + ics_text(title),
+        "DESCRIPTION:" + ics_text("\n".join(lines)),
+        "BEGIN:VALARM",
+        "ACTION:DISPLAY",
+        "DESCRIPTION:" + ics_text(title),
+        f"TRIGGER:-PT{REMINDER_MINUTES}M",
+        "END:VALARM",
+        "END:VEVENT",
+    ]
+
+
+def save_player_calendars(players, matches):
+    """Write calendars/<player id>.ics for every player we follow, with their
+    matches in the data (a few past days and the next week). A player with no
+    matches gets an empty calendar, so the subscription keeps working."""
+    CALENDAR_DIR.mkdir(parents=True, exist_ok=True)
+    for old in CALENDAR_DIR.glob("*.ics"):   # players who left the list disappear
+        old.unlink()
+    stamp = ics_time(datetime.now(timezone.utc))
+    for p in players:
+        own = [m for m in matches
+               if any(f["id"] == p["id"] for side in (m["home"], m["away"]) for f in side["finns"])]
+        lines = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//Finn for the Win//EN",
+            "CALSCALE:GREGORIAN",
+            "METHOD:PUBLISH",
+            "X-WR-CALNAME:" + ics_text(f"⚽ {p['name']} (Finn FTW)"),
+            "X-WR-CALDESC:" + ics_text(f"{p['name']}'s matches, from Finn for the Win: {SITE_URL}"),
+            # A hint to calendar apps to check for changes every 6 hours.
+            # Not all of them listen; Google decides by itself.
+            "REFRESH-INTERVAL;VALUE=DURATION:PT6H",
+            "X-PUBLISHED-TTL:PT6H",
+        ]
+        for m in own:
+            lines += ics_event(m, stamp)
+        lines.append("END:VCALENDAR")
+        text = "\r\n".join(ics_fold(line) for line in lines) + "\r\n"
+        (CALENDAR_DIR / f"{p['id']}.ics").write_bytes(text.encode("utf-8"))
+    print(f"Saved {len(players)} player calendars to {CALENDAR_DIR}")
+
+
+# ---------------------------------------------------------------------------
 # Putting it together
 # ---------------------------------------------------------------------------
 
@@ -421,6 +525,7 @@ def main():
         ensure_ascii=False, indent=2))
     save_player_page_data(players, not_followed)
     update_history(history, fetched, fetch_days, center)
+    save_player_calendars(players, matches)
 
     # Print a readable summary in the Terminal.
     print(f"\n{len(matches)} matches with Finns, {days[0]} to {days[-1]} (Finnish time):")

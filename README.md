@@ -27,6 +27,7 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `data/finnish_players.json` | The saved list of Finnish players (rebuilt automatically once a week, and daily during transfer windows: January to early February, mid-June to early September). |
 | `data/matches.json` | The result: matches with Finns, which the website will read. |
 | `data/players.json` | Every Finn we follow, grouped by league, for the website's "All Finns" page. |
+| `data/calendars/<id>.ics` | One calendar file per player, rewritten on every run. Visitors subscribe to them from the All Finns page ("Subscribe in calendar"). Always in English. |
 | `data/history.json` | Finished matches from the last two weeks, for the weekly summary. Kept on the live site between runs. |
 | `.github/workflows/update-site.yml` | The automatic update, 4× a day and on every push. Two jobs: **build** (run the script, draw preview pictures, package the site) and **publish** (put it on GitHub Pages). |
 | `site/index.html` | The main page: matches by day. |
@@ -81,3 +82,6 @@ Later runs reuse the saved player list and are quicker.
 - The share picture fits about 4–5 goalscorers; in busy weeks the rest become "+ N more". Sharing a file needs a fairly
   new phone browser; older ones download the picture instead.
 - Chat apps remember a link's preview, sometimes for days, so a pasted This week link may show an older week's picture.
+- Calendar subscriptions only hold the player's matches from 3 days back to 7 days ahead; older events disappear from the
+  calendar. The calendar app decides how often it checks for changes (Google can take up to a day). They're per player,
+  because the site doesn't know whom a visitor follows (stars stay on the phone).

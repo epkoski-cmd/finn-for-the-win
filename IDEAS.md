@@ -7,15 +7,13 @@ Write ideas down as soon as they come up, even half-formed ones.
 
 
 ## Maybe later
-- **New feature** - Automatically add matches for starred playets to the users calendar. 
 - **Women's leagues we can't track yet** – find a free data source for Damallsvenskan,
   Toppserien, Serie A Femminile and Kvindeligaen (many Helmarit players are there).
 - **More men's leagues** – Poland (Håkans) and Czechia (Mahuta) are missing from the data
   source; look for another free source, or check if more leagues have been added.
 - **WSL broadcaster in Finland** – not confirmed yet; check Viaplay / Disney+ / others.
 - **Further-ahead fixtures** – show or add to calendar matches beyond 7 days
-  (e.g. each followed player's club schedule).
-- **Calendar subscription per player** – a calendar link that updates by itself.
+  (e.g. each followed player's club schedule). Would also make calendar subscriptions more useful.
 - **Player page** – one player's recent matches, goals and next games.
 - **Share a single match or player** – e.g. "Pohjanpalo scored twice" as its own picture.
 - **Notifications** ("your player is in the starting lineup") – needs a server or push
@@ -48,3 +46,4 @@ Write ideas down as soon as they come up, even half-formed ones.
   (fixes the occasional "No artifacts named github-pages" failure).
 - Finnish league names in the Finnish view ("Saksan 2. Bundesliga"), table in `texts.js`.
 - Player list rebuilt daily during transfer windows (1.1.–10.2. and 15.6.–10.9.), weekly otherwise.
+- Calendar subscription per player ("Subscribe in calendar" on the All Finns page; .ics files in English, updated 4× a day).

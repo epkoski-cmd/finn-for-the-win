@@ -2,6 +2,7 @@
 # data/ is created by find_finns.py on every run, so it doesn't belong in the code history.
 data/
 site/data/
+site/calendars/
 __pycache__/
 .DS_Store
 site/version.json

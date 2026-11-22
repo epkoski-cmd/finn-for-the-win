@@ -39,6 +39,16 @@
 .finns.plain .finn { grid-template-columns: 1fr; }   /* no star: these players can't be followed */
 .next { font-size: 0.82rem; color: var(--muted); }
 .next.soon { color: var(--accent); font-weight: 500; }
+/* "Subscribe in calendar": a small fold-out under each player */
+details.cal { flex-basis: 100%; font-size: 0.82rem; }
+details.cal summary { cursor: pointer; color: var(--muted); width: fit-content; list-style: none; }
+details.cal summary::-webkit-details-marker { display: none; }   /* Safari's own arrow */
+details.cal summary:hover, details.cal[open] summary { color: var(--fg); }
+details.cal .cal-body { display: grid; gap: 6px; margin: 6px 0 4px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+details.cal .note { margin: 0; color: var(--muted); }
+details.cal .cal-links { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+details.cal a, details.cal .link-btn { color: var(--accent); font-size: 0.82rem; }
+details.cal .copied { color: var(--muted); overflow-wrap: anywhere; }
 </style>
 </head>
 <body data-title="finnsPageTitle">
@@ -127,7 +137,41 @@ function playerItem(p) {
     const n = nextText(m, p.club);
     info.append(el("span", "next" + (n.soon ? " soon" : ""), n.text));
   }
+  info.append(calendarLinks(p));
   return li;
+}
+
+// "Subscribe in calendar": find_finns.py writes calendars/<player id>.ics
+// 4× a day. Calendar apps that subscribe to it check it now and then.
+// "webcal://" asks the phone's calendar app to subscribe (iPhone, Mac,
+// Outlook); Google Calendar has its own "add by address" link.
+function calendarLinks(p) {
+  const fileUrl = new URL("calendars/" + p.id + ".ics", location.href).href;
+  const webcal = fileUrl.replace(/^https?:/, "webcal:");
+  const details = el("details", "cal");
+  const body = el("div", "cal-body");
+  const links = el("div", "cal-links");
+  const apple = el("a", null, t("calApple"));
+  apple.href = webcal;
+  const google = el("a", null, t("calGoogle"));
+  google.href = "https://calendar.google.com/calendar/render?cid=" + encodeURIComponent(webcal);
+  google.target = "_blank";
+  google.rel = "noopener";
+  const copy = el("button", "link-btn", t("calCopy"));
+  copy.type = "button";
+  const result = el("span", "copied");
+  copy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(fileUrl);
+      result.textContent = t("calCopied");
+    } catch (err) {
+      result.textContent = t("calCopyFailed") + " " + fileUrl;   // copy it by hand
+    }
+  });
+  links.append(apple, google, copy, result);
+  body.append(el("p", "note", t("calSubscribeNote", p.name)), links);
+  details.append(el("summary", null, t("calSubscribe")), body);
+  return details;
 }
 
 // National team players whose clubs we can't follow (found by find_finns.py),
