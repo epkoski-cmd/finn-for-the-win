@@ -13,36 +13,39 @@ on:
   push:
     branches: [main]      # also run whenever new code is uploaded
 
-# Permissions this workflow needs: read the code, publish to GitHub Pages.
+# Permissions this workflow needs: read the code, publish to GitHub Pages
+# (pages + id-token), and find the packaged site between the two jobs (actions).
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 # Never run two updates at once.
 concurrency:
   group: pages
   cancel-in-progress: false
 
+# Two jobs, like GitHub's own example: "build" makes the site and packages
+# it, then "publish" puts that package online. As one job, the publish step
+# sometimes looked for the package a split second after the upload, before
+# GitHub had it listed, and failed ("No artifacts named github-pages").
 jobs:
-  update:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - name: Download the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
       # The list of Finnish players takes ~550 requests to build, so we keep
       # it between runs. find_finns.py rebuilds it by itself once it's a week old.
       - name: Reuse this week's player list
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: data/finnish_players.json
           key: finnish-players-${{ github.run_id }}
@@ -96,10 +99,17 @@ jobs:
           ls -l preview-*.png
 
       - name: Package the site
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
+  publish:
+    needs: build            # starts only after "build" has finished
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - name: Publish to GitHub Pages
         id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
