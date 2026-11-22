@@ -48,7 +48,8 @@ Ideas and next steps live in `IDEAS.md`. File-by-file overview in `README.md`.
 - **The data source has errors.** Known ones and their fixes:
   - wrong citizenship → `EXTRA_FINNS`
   - player listed at a club they don't play for → `WRONG_CLUBS`
-  - player missing from a squad list → found through national team lineups automatically
+  - player missing from a squad list → found through national team lineups automatically; for a player we
+    know plays at a followed club (Leo Walta at LAFC), also add them to `MISSING_FROM_SQUADS` as a safety net
   - Finnish club without a `fin.` code → `FINNISH_CLUBS_WITHOUT_CODE`
   - scoreboard date ranges fail → fetch one day at a time
   - the data source's "day" is US time → also fetch the day before

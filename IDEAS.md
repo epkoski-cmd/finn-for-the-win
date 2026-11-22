@@ -48,3 +48,4 @@ Write ideas down as soon as they come up, even half-formed ones.
 - Fewer requests to ESPN: past days from the history, cached league names and club lookups, no run for notes-only pushes (~710 → ~500 per run).
 - National team players are remembered for a year, so players missing from squad lists (Leo Walta) stay found between international windows.
 - Further-ahead fixtures: club league fixtures to the end of the season in calendar subscriptions and the All Finns "Next:" line (fetched once a day).
+- Safety net for Finns missing from squad lists (`MISSING_FROM_SQUADS`): Leo Walta stays followed at LAFC.

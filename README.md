@@ -95,6 +95,8 @@ Later runs reuse the saved player list and are quicker.
 - Club squad lists sometimes miss a player (e.g. Leo Walta at LAFC). The script therefore looks up the club of every
   Finland national team player of the last year (`national_team_players.json`) it hasn't found, and adds them if their club is in a league we follow. Players at Finnish
   clubs are skipped on purpose; Finnish clubs are recognised by a code starting with `fin.`, plus `FINNISH_CLUBS_WITHOUT_CODE`.
+  Players we know about are also listed by hand in `MISSING_FROM_SQUADS` (Walta at LAFC), so they stay followed even
+  without Finland matches; the script warns if ESPN shows them at another club.
 - A few Finns are listed under another citizenship (e.g. Fredrik Oldrup Jensen as Norwegian). Add them to `EXTRA_FINNS`
   in `find_finns.py`. The website's "Played for Finland, not followed yet" list shows who might be missing.
 - The streaming table is partly from a Finnish streaming guide, not official sources. Entries are marked `"confidence": "guide"` until confirmed.

@@ -73,6 +73,16 @@ EXTRA_FINNS = {
     "221227": "Fredrik Oldrup Jensen",   # listed as Norway (2026-11-18)
 }
 
+# Finns we know play for a club in a league we follow, but whom the club's
+# squad list misses. Player ID -> (name, club's team ID). They're followed
+# at that club even if they haven't played for Finland lately.
+# If the player's ESPN page shows another club in a league we follow, that
+# club wins (a transfer). If it shows a club we can't follow, the script
+# prints a warning: check whether they've moved, and remove the entry if so.
+MISSING_FROM_SQUADS = {
+    "323176": ("Leo Walta", "18966"),   # LAFC's squad list misses him (2026-11-22)
+}
+
 # Players the data source lists at a club they don't play for (besides their
 # real club). Player ID -> the wrong club's team ID; that listing is ignored.
 # The script prints a note when an entry is no longer needed.
@@ -298,12 +308,49 @@ def check_national_team_players(players, teams, national_team, cache):
         if club["id"] in teams:
             team = teams[club["id"]]
             added.append({"id": pid, "name": name, "team_id": club["id"], "team_name": team["name"],
-                          "league": team["league"], "women": team["league"] in WOMEN_COMPETITIONS})
+                          "league": team["league"], "women": team["league"] in WOMEN_COMPETITIONS,
+                          "source": "national team"})
         elif not (club["slug"].startswith("fin.") or club["id"] in FINNISH_CLUBS_WITHOUT_CODE):
             not_followed.append({"id": pid, "name": name, "club": club["name"], "women": women})
     if added:
         print("Added from national team lineups: " + ", ".join(p["name"] for p in added))
     return players + added, not_followed
+
+
+def add_missing_from_squads(players, not_followed, teams, cache):
+    """Make sure every MISSING_FROM_SQUADS player is followed (see above)."""
+    known_clubs = cache.setdefault("player_clubs", {})
+    for pid, (name, team_id) in MISSING_FROM_SQUADS.items():
+        found = [p for p in players if p["id"] == pid]
+        if found:
+            if any(p["team_id"] == team_id for p in found):
+                in_squad = [p for p in found if p.get("source") != "national team"]
+                if in_squad:
+                    print(f"Note: {name} is in a squad list now; MISSING_FROM_SQUADS entry {pid} is no longer needed.")
+            continue   # followed already (at the hand-made club, or a new club we follow)
+        if pid not in known_clubs:
+            try:
+                known_clubs[pid] = espn.player_club(pid)
+            except Exception:
+                pass   # no answer: follow them at the hand-made club anyway
+        club = known_clubs.get(pid)
+        if club and club["id"] != team_id:
+            if club["id"] in teams:   # moved to another club we follow: that one wins
+                team = teams[club["id"]]
+                players.append({"id": pid, "name": name, "team_id": club["id"], "team_name": team["name"],
+                                "league": team["league"], "women": team["league"] in WOMEN_COMPETITIONS})
+                print(f"Note: {name} is at {club['name']} on ESPN; update MISSING_FROM_SQUADS entry {pid}.")
+                continue
+            print(f"Warning: {name}'s ESPN page says {club['name']}, not the club in MISSING_FROM_SQUADS. "
+                  f"Moved? If so, remove entry {pid}.")
+        if team_id not in teams:
+            print(f"Warning: MISSING_FROM_SQUADS club {team_id} for {name} isn't in a league we follow.")
+            continue
+        team = teams[team_id]
+        players.append({"id": pid, "name": name, "team_id": team_id, "team_name": team["name"],
+                        "league": team["league"], "women": team["league"] in WOMEN_COMPETITIONS})
+        not_followed[:] = [p for p in not_followed if p["id"] != pid]
+    return players, not_followed
 
 
 # ---------------------------------------------------------------------------
@@ -668,6 +715,7 @@ def main():
     national_team = load_national_team_players()
     remember_national_team_players(national_team, history, center)
     players, not_followed = check_national_team_players(players, teams, national_team, cache)
+    players, not_followed = add_missing_from_squads(players, not_followed, teams, cache)
     covered = set(history["days_covered"])
     missing = [center - timedelta(days=n) for n in range(1, HISTORY_DAYS + 1)
                if (center - timedelta(days=n)).isoformat() not in covered]
