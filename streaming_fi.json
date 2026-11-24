@@ -1,5 +1,5 @@
 {
-  "_about": "Where each competition can be watched legally in Finland. Edited by hand, checked once a season. 'confidence': official = confirmed by the broadcaster or league (their own site, schedule or press release); guide = from a Finnish streaming guide (etusuora.com), not yet confirmed. 'coverage': all = every match; selected = only some matches are shown. 'url': the page to watch it (the site links it only when confidence is official). A competition missing from this list = no known Finnish broadcaster. Betting sites (e.g. Bet365) that stream matches are deliberately left out. Checked with no Finnish option (2026-11-17): Eredivisie, Eerste Divisie, Serie B, Greek Super League, Belgian Pro League, Swiss Super League, Scottish Premiership, USL Championship. LaLiga 2: MTV showed selected matches until 2025-26, but LaLiga moved to Disney+ in 2026-27 and LaLiga 2 isn't confirmed anywhere, so it's left out until confirmed. Women's football (checked 2026-11-18): no Finnish broadcaster confirmed for the Women's Super League (Viaplay Finland has no WSL page), Première Ligue, Liga F or Vrouwen Eredivisie.",
+  "_about": "Where each competition can be watched legally in Finland. Edited by hand, checked once a season. 'confidence': official = confirmed by the broadcaster or league (their own site, schedule or press release); guide = from a Finnish streaming guide (etusuora.com), not yet confirmed. 'coverage': all = every match; selected = only some matches are shown. 'url': the page to watch it (the site links it only when confidence is official). A competition missing from this list = no known Finnish broadcaster. Betting sites (e.g. Bet365) that stream matches are deliberately left out. Checked with no Finnish option (2026-11-17): Eredivisie, Eerste Divisie, Serie B, Greek Super League, Belgian Pro League, Swiss Super League, Scottish Premiership, USL Championship. LaLiga 2: MTV showed selected matches until 2025-26, but LaLiga moved to Disney+ in 2026-27 and LaLiga 2 isn't confirmed anywhere, so it's left out until confirmed. Women's football (checked 2026-11-18): no Finnish broadcaster confirmed for the Première Ligue, Liga F or Vrouwen Eredivisie. Women's Super League (checked 2026-11-24): no Finnish TV partner (Viaplay Finland has no WSL page), so the league streams every match on its own YouTube channel; a third-party listing saying Viaplay has it until 2027 contradicts the league's own TV guide and was ignored.",
   "season": "2026-27",
   "finland_national_team": {
     "service": "Yle Areena",
@@ -180,6 +180,16 @@
       "checked": "2026-11-17",
       "confidence": "guide",
       "source": "https://etusuora.com/live-stream/jalkapallo"
+    },
+    "eng.w.1": {
+      "service": "YouTube (Barclays WSL)",
+      "free": true,
+      "coverage": "all",
+      "note": "The league's own YouTube channel shows every match in Finland, as there's no Finnish TV partner. The league's TV guide is per matchweek (checked matchweeks 10 and 11), so this could change",
+      "checked": "2026-11-24",
+      "confidence": "official",
+      "source": "https://www.wslfootball.com/news/wsl/how-to-watch-the-barclays-wsl-matchweek-11-tv-guide",
+      "url": "https://www.youtube.com/@BarclaysWSL"
     },
     "uefa.wchampions": {
       "service": "Disney+",

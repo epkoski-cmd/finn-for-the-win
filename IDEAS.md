@@ -10,7 +10,6 @@ Write ideas down as soon as they come up, even half-formed ones.
   Toppserien, Serie A Femminile and Kvindeligaen (many Helmarit players are there).
 - **More men's leagues** – Poland (Håkans) and Czechia (Mahuta) are missing from the data
   source; look for another free source, or check if more leagues have been added.
-- **WSL broadcaster in Finland** – not confirmed yet; check Viaplay / Disney+ / others.
 - **Player page** – one player's recent matches, goals and next games.
 - **Share a single match or player** – e.g. "Pohjanpalo scored twice" as its own picture.
 - **Notifications** ("your player is in the starting lineup") – needs a server or push
@@ -52,3 +51,4 @@ Write ideas down as soon as they come up, even half-formed ones.
 - Match of the day: a banner above the day's list, linking to the biggest match (Finland first, then Champions League,
   the big five leagues…). Separate men's and women's rankings; the All view shows one of each. Skipped once lineups show
   every Finn on the bench, and on days with only one match.
+- WSL in Finland: free on the league's own YouTube channel (no Finnish TV partner), confirmed from the league's TV guide.
