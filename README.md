@@ -38,7 +38,7 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `site/share.js` | Draws the share picture and the link preview pictures on a canvas. The "Share this week as an image" button: draws the week's goalscorers and assists on a canvas and opens the phone's share menu (or downloads the picture on a computer). |
 | `site/weekdata.js` | Adds up the last 7 days (goals, assists, who played). Used by the This week page and the link preview. |
 | `site/preview.html` | Hidden helper page. The workflow opens it in Chrome and saves screenshots as `preview-site.png` and `preview-week.png`: the pictures shown when a link is pasted into WhatsApp etc. Always English. |
-| `site/shared.js` | Code both pages use: language switch, favourite players, calendar files and the error-report link. |
+| `site/shared.js` | Code both pages use: language switch, favourite players, calendar files and the error-report link. Also `MATCH_OF_THE_DAY_RANKING`: the order of competitions, biggest first, used to pick the match of the day (move a line to change the order). |
 | `site/untracked.json` | Edited by hand: Finnish players in leagues we can't follow (e.g. Damallsvenskan), shown on the All Finns page. |
 | `site/texts.js` | Every text on the site in Finnish and English. Edit wordings here. At the end, `LEAGUE_NAMES_FI`: Finnish league names by league code (English shows the data source's name). |
 
@@ -99,6 +99,10 @@ Later runs reuse the saved player list and are quicker.
   without Finland matches; the script warns if ESPN shows them at another club.
 - A few Finns are listed under another citizenship (e.g. Fredrik Oldrup Jensen as Norwegian). Add them to `EXTRA_FINNS`
   in `find_finns.py`. The website's "Played for Finland, not followed yet" list shows who might be missing.
+- Match of the day is picked by a hand-made ranking of competitions (a Finland match always first), not by the teams'
+  strength, so a Bundesliga relegation battle beats an Eredivisie title match. Before lineups are out we can't know
+  whether the Finn plays; once they are, a match where every Finn sat on the bench or was left out is skipped.
+  A view with only one match that day shows no banner.
 - The streaming table is partly from a Finnish streaming guide, not official sources. Entries are marked `"confidence": "guide"` until confirmed.
 - The share picture fits about 4–5 goalscorers; in busy weeks the rest become "+ N more". Sharing a file needs a fairly
   new phone browser; older ones download the picture instead.

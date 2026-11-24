@@ -169,6 +169,67 @@ const FINLAND_TEAM_IDS = ["458", "7536"];
 function finlandSide(m) {
   return FINLAND_TEAM_IDS.includes(m.home.id) ? m.home : m.away;
 }
+// ---------------------------------------------------------------------------
+// Match of the day: how big each competition is, biggest first.
+//   A Finland national team match always comes before everything on these
+//   lists. Men's and women's competitions have their own lists, because the
+//   All view shows one pick of each. A competition missing from the list
+//   can still be picked, but only if nothing on the list plays that day.
+//   To change the order, just move a line.
+// ---------------------------------------------------------------------------
+const MATCH_OF_THE_DAY_RANKING = {
+  men: [
+    "uefa.champions",                                  // Champions League
+    "eng.1", "esp.1", "ger.1", "ita.1", "fra.1",       // the big five leagues
+    "uefa.europa",                                     // Europa League
+    "por.1", "ned.1", "uefa.europa.conf", "bel.1",     // Portugal, Netherlands, Conference League, Belgium
+    "tur.1", "eng.2", "usa.1", "sco.1", "ksa.1",       // Turkey, Championship, MLS, Scotland, Saudi Arabia
+    "gre.1", "aut.1", "sui.1", "den.1",                // Greece, Austria, Switzerland, Denmark
+    "esp.2", "ger.2", "ita.2", "fra.2",                // second divisions of the big leagues
+    "jpn.1", "nor.1", "swe.1", "eng.3", "aus.1",
+    "ned.2", "sco.2", "usa.usl.1", "eng.4",
+  ],
+  women: [
+    "uefa.wchampions",                                 // Women's Champions League
+    "eng.w.1", "esp.w.1", "fra.w.1", "usa.nwsl",       // WSL, Liga F, Première Ligue, NWSL
+    "ned.w.1", "usa.w.usl.1", "aus.w.1", "mex.w.1", "can.w.nsl",
+  ],
+};
+
+// The Finns who count in a match: for Finland's own matches only Finland's side.
+function finnsIn(m) {
+  return m.national_team ? finlandSide(m).finns : m.home.finns.concat(m.away.finns);
+}
+// Finns who are known to be on the pitch (started or came on).
+function finnsPlaying(m) {
+  return finnsIn(m).filter(f => f.role === "started" || f.role === "came on").length;
+}
+// A match can't be the match of the day if the lineups are known and every
+// Finn sat on the bench or was left out. Before lineups, every match counts.
+function finnMayPlay(m) {
+  const finns = finnsIn(m);
+  if (!finns.length) return true;                 // national team: lineup not out yet
+  return finns.some(f => !f.role || f.role === "started" || f.role === "came on");
+}
+// Smaller number = bigger match. Finland -1, then the list order, unknown last.
+function matchRank(m) {
+  if (m.national_team) return -1;
+  const list = MATCH_OF_THE_DAY_RANKING[m.women ? "women" : "men"];
+  const i = list.indexOf(m.league);
+  return i === -1 ? list.length : i;
+}
+// The match of the day out of `matches`, or null. Ties: more Finns on the
+// pitch wins, then more Finns in the squad, then the earlier kickoff.
+function matchOfTheDay(matches) {
+  const candidates = matches.filter(finnMayPlay);
+  candidates.sort((a, b) =>
+    matchRank(a) - matchRank(b)
+    || finnsPlaying(b) - finnsPlaying(a)
+    || finnsIn(b).length - finnsIn(a).length
+    || a.kickoff_utc.localeCompare(b.kickoff_utc));
+  return candidates[0] || null;
+}
+
 // A league's name in the chosen language: the Finnish name from texts.js,
 // or the data source's English name if there's none (or the site is in English).
 function leagueName(code, englishName) {

@@ -38,6 +38,7 @@
   <nav class="days" id="days" data-t-label="chooseDay"></nav>
   <div class="filters" id="filters"></div>
   <p class="summary" id="summary" data-t="loadingMatches">Loading matches…</p>
+  <div class="motd-list" id="motd"></div>
   <section class="list" id="list" aria-live="polite"></section>
 
   <footer>
@@ -111,10 +112,40 @@ function renderDays() {
   strip.querySelector('[aria-pressed="true"]')?.scrollIntoView({ inline: "center", block: "nearest" });
 }
 
+// The day's biggest match (the ranking lives in shared.js). The Men and
+// Women views get one pick each, the All view one of both.
+let picks = [];   // the match-of-the-day matches currently shown
+
+function renderMatchOfTheDay(matches) {
+  const box = document.getElementById("motd");
+  box.replaceChildren();
+  const groups = [false, true].filter(women => showsGender(women));
+  // A group with only one match has nothing to choose from: no banner then.
+  picks = groups.map(women => matches.filter(m => m.women === women))
+                .filter(group => group.length >= 2)
+                .map(matchOfTheDay)
+                .filter(Boolean);
+  for (const m of picks) {
+    // A link to the match's card further down the page.
+    const banner = el("a", "motd");
+    banner.href = "#match-" + m.id;
+    const label = picks.length === 1 ? t("matchOfTheDay") : t(m.women ? "matchOfTheDayWomen" : "matchOfTheDayMen");
+    const played = m.state !== "pre";
+    const comp = m.national_team ? nationalTeamName(m.women) : leagueName(m.league, m.league_name);
+    banner.append(
+      el("span", "motd-label", label),
+      el("span", "motd-teams", m.home.name + (played ? " " + m.home.score + "–" + m.away.score + " " : " – ") + m.away.name),
+      el("span", "motd-info", comp + " · " + clockTime(m.kickoff_fi)),
+    );
+    box.append(banner);
+  }
+}
+
 function renderMatches() {
   const list = document.getElementById("list");
   list.replaceChildren();
   const matches = visibleMatches(selectedDay);
+  renderMatchOfTheDay(matches);
 
   const finnCount = matches.reduce((n, m) => n + m.home.finns.length + m.away.finns.length, 0);
   const summary = document.getElementById("summary");
@@ -168,6 +199,9 @@ function finnItem(finn, clubName) {
 function matchCard(m) {
   const card = el("article", "match" + (m.national_team ? " nt" : "") + (hasFavourite(m) ? " fav" : ""));
   card.match = m;   // remembered so the gold edge can be updated without redrawing
+  card.id = "match-" + m.id;   // the match-of-the-day banner links here
+  const isPick = picks.includes(m);
+  if (isPick) card.classList.add("motd-card");
   card.append(el("div", "time", clockTime(m.kickoff_fi)));
   const body = el("div", "body");
 
@@ -176,6 +210,7 @@ function matchCard(m) {
     m.national_team ? nationalTeamName(m.women) + " · " + leagueName(m.league, m.league_name) : leagueName(m.league, m.league_name));
   // When men's and women's matches are mixed, women's get a small tag.
   if (m.women && gender === "all") comp.prepend(el("span", "tag-w", t("womenTag")));
+  if (isPick) comp.prepend(el("span", "tag-motd", t("matchOfTheDay")));
   const teams = el("div", "teams");
   const home = el("div", "team home" + (m.home.finns.length ? " finnish" : ""), m.home.name);
   const away = el("div", "team away" + (m.away.finns.length ? " finnish" : ""), m.away.name);

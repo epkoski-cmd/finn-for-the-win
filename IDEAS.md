@@ -4,10 +4,6 @@ A running list. Pick one per session; move it to **Done** when it's live.
 Write ideas down as soon as they come up, even half-formed ones.
 
 ## Next
-- **Match of the day** – highlight one match a day: a Finn playing in the most prestigious league.
-  Needs a ranking of all our leagues together (English Premier League first). Open questions:
-  where cups (Champions League) and national team matches fit, does it matter if the Finn
-  actually plays (lineup), and men's and women's leagues in one ranking or two.
 
 ## Maybe later
 - **Women's leagues we can't track yet** – find a free data source for Damallsvenskan,
@@ -53,3 +49,6 @@ Write ideas down as soon as they come up, even half-formed ones.
 - Further-ahead fixtures: club league fixtures to the end of the season in calendar subscriptions and the All Finns "Next:" line (fetched once a day).
 - Safety net for Finns missing from squad lists (`MISSING_FROM_SQUADS`): Leo Walta stays followed at LAFC.
 - My Finns on top: followed players' matches come first in the day list, then an "Other matches" heading (sorted when the list is drawn, so tapping a star doesn't move anything).
+- Match of the day: a banner above the day's list, linking to the biggest match (Finland first, then Champions League,
+  the big five leagues…). Separate men's and women's rankings; the All view shows one of each. Skipped once lineups show
+  every Finn on the bench, and on days with only one match.
