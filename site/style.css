@@ -69,6 +69,9 @@ h1 .cross { color: var(--accent); }
 
 /* Match cards */
 .list { display: grid; gap: 12px; }
+/* "Other matches" heading between the followed players' matches and the rest */
+.list-divider { margin: 8px 0 -4px; font-family: var(--display); font-size: 0.85rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .match {
   background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
   display: grid; grid-template-columns: 64px 1fr; overflow: hidden;

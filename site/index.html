@@ -133,7 +133,15 @@ function renderMatches() {
     list.append(empty);
     return;
   }
-  for (const m of matches) list.append(matchCard(m));
+  // Matches of followed players come first, the rest after an "Other matches"
+  // heading. Both groups keep their kickoff order. This only happens when the
+  // list is drawn (page load, day or view change): tapping a star never moves
+  // a match, so the page doesn't jump under your finger.
+  const mine = matches.filter(hasFavourite);
+  const others = matches.filter(m => !hasFavourite(m));
+  for (const m of mine) list.append(matchCard(m));
+  if (mine.length && others.length) list.append(el("h2", "list-divider", t("otherMatches")));
+  for (const m of others) list.append(matchCard(m));
 }
 
 function finnItem(finn, clubName) {

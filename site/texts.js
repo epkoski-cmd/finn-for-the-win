@@ -63,6 +63,7 @@ const TEXTS = {
     allFinns: "Kaikki suomalaiset",
     myFinns: "★ Omat suomalaiset",
     following: "Seuraat:",
+    otherMatches: "Muut ottelut",
     addAllToCalendar: n => "📅 Lisää pelaajiesi " + (n === 1 ? "seuraava ottelu" : "seuraavat " + n + " ottelua") + " kalenteriin",
     footer: "Ajat ovat Suomen aikaa. Otteluiden tiedot tulevat julkisista urheilutietolähteistä, ja niissä voi olla virheitä. Maalisyöttöjä voi puuttua joistakin otteluista. Katselutiedot tarkistetaan käsin. Käynnit lasketaan nimettömästi, ilman evästeitä.",
 
@@ -189,6 +190,7 @@ const TEXTS = {
     allFinns: "All Finns",
     myFinns: "★ My Finns",
     following: "Following:",
+    otherMatches: "Other matches",
     addAllToCalendar: n => "📅 Add your players' next " + (n === 1 ? "match" : n + " matches") + " to your calendar",
     footer: "Times are Finnish time. Match data from public sports data feeds, and it may contain errors. Assists may be missing for some matches. Streaming info is checked by hand. Visits are counted anonymously, with no cookies.",
 

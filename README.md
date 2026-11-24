@@ -31,7 +31,7 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `data/national_team_players.json` | Everyone who has played for Finland in the last year (from the history's national team lineups). Used to find Finns missing from club squad lists, also between international windows. Kept on the live site between runs, like the history. |
 | `data/history.json` | Finished matches from the last two weeks, for the weekly summary. Kept on the live site between runs. |
 | `.github/workflows/update-site.yml` | The automatic update, 4× a day and on every push. Two jobs: **build** (run the script, draw preview pictures, package the site) and **publish** (put it on GitHub Pages). |
-| `site/index.html` | The main page: matches by day. |
+| `site/index.html` | The main page: matches by day, followed players' matches first. |
 | `site/week.html` | The "This week" page: goals, assists and who played in the last 7 days. |
 | `site/finns.html` | The "All Finns" page: every followed player, with a search box. |
 | `site/style.css` | The look of both pages (colours, fonts, layout). |

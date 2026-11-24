@@ -8,8 +8,6 @@ Write ideas down as soon as they come up, even half-formed ones.
   Needs a ranking of all our leagues together (English Premier League first). Open questions:
   where cups (Champions League) and national team matches fit, does it matter if the Finn
   actually plays (lineup), and men's and women's leagues in one ranking or two.
-- **My Finns on top** – show matches of the players I follow at the top of the day's list, not
-  just highlighted. Next to or below the match of the day.
 
 ## Maybe later
 - **Women's leagues we can't track yet** – find a free data source for Damallsvenskan,
@@ -54,3 +52,4 @@ Write ideas down as soon as they come up, even half-formed ones.
 - National team players are remembered for a year, so players missing from squad lists (Leo Walta) stay found between international windows.
 - Further-ahead fixtures: club league fixtures to the end of the season in calendar subscriptions and the All Finns "Next:" line (fetched once a day).
 - Safety net for Finns missing from squad lists (`MISSING_FROM_SQUADS`): Leo Walta stays followed at LAFC.
+- My Finns on top: followed players' matches come first in the day list, then an "Other matches" heading (sorted when the list is drawn, so tapping a star doesn't move anything).
