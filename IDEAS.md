@@ -8,8 +8,6 @@ Write ideas down as soon as they come up, even half-formed ones.
 ## Maybe later
 - **Women's leagues we can't track yet** – find a free data source for Damallsvenskan,
   Toppserien, Serie A Femminile and Kvindeligaen (many Helmarit players are there).
-- **More men's leagues** – Poland (Håkans) and Czechia (Mahuta) are missing from the data
-  source; look for another free source, or check if more leagues have been added.
 - **Player page** – one player's recent matches, goals and next games.
 - **Share a single match or player** – e.g. "Pohjanpalo scored twice" as its own picture.
 - **Notifications** ("your player is in the starting lineup") – needs a server or push
@@ -17,6 +15,17 @@ Write ideas down as soon as they come up, even half-formed ones.
 - **User accounts** – favourites on all devices; mainly as a learning exercise.
 - **Own address** (custom domain) instead of github.io.
 - Ask friends what they'd want to see.
+
+## Decided against
+- **Poland and Czechia (Håkans, Mahuta)** – checked 2026-11-25; they stay under "Not tracked yet".
+  - ESPN still has no Polish league, and the Czech one has no teams or matches. Romania and Cyprus
+    have squad lists but no matches since 2025 / spring 2026, so they're no use either.
+  - TheSportsDB (free key `123`) has both leagues with times and scores, but no lineups or goals.
+    Day lists are capped at 3 matches (whole rounds via `eventsround.php` work). Its terms allow free
+    use only for "development projects", which may not cover a public site.
+  - Czechia: no legal way to watch in Finland found (Oneplay in Czechia, Betano = betting).
+    Poland: Ekstraklasa.TV (the league's own service) streams worldwide except PL/BY/RU.
+  - Revisit if ESPN adds the leagues, or a Finnish broadcaster picks them up.
 
 ## Done
 - Step 1: script that finds Finns abroad and their matches (free ESPN data).
