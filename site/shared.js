@@ -192,6 +192,7 @@ const MATCH_OF_THE_DAY_RANKING = {
   women: [
     "uefa.wchampions",                                 // Women's Champions League
     "eng.w.1", "esp.w.1", "fra.w.1", "usa.nwsl",       // WSL, Liga F, Première Ligue, NWSL
+    "uefa.w.europa",                                   // Women's Europa Cup
     "ned.w.1", "usa.w.usl.1", "aus.w.1", "mex.w.1", "can.w.nsl",
   ],
 };

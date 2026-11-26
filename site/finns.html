@@ -225,6 +225,7 @@ function render() {
     .map(l => ({ ...l, players: l.players.filter(p => matchesSearch(text, p.name, p.club, l.name_fi, l.name_en)) }))
     .filter(l => l.players.length || !text);
   if (groups.length) {
+    const tracked = new Set(leagues.flatMap(l => l.players.map(p => p.name)));
     const box = el("section", "league nt-extra");
     box.append(el("h2", null, t("untrackedTitle")),
       el("p", "note", t("untrackedNote")),
@@ -237,7 +238,10 @@ function render() {
       for (const p of l.players) {
         const li = el("li", "finn");
         const info = el("span", "info");
-        info.append(el("span", "name", p.name), el("span", "club", p.club));
+        // Some of these players' clubs play in a cup we follow (the Women's
+        // Europa Cup), so they're also listed above: say only cups show.
+        const club = tracked.has(p.name) ? p.club + " · " + t("untrackedCupOnly") : p.club;
+        info.append(el("span", "name", p.name), el("span", "club", club));
         li.append(info);
         ul.append(li);
       }

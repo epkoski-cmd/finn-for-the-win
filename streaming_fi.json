@@ -201,6 +201,15 @@
       "source": "https://thewaltdisneycompany.eu/disney-becomes-the-home-of-uefa-womens-champions-league-across-europe/",
       "url": "https://www.disneyplus.com/fi-fi"
     },
+    "uefa.w.europa": {
+      "service": "UEFA.tv",
+      "free": true,
+      "coverage": "all",
+      "note": "UEFA streamed the 2025/26 final on UEFA.tv, UEFA.com and UEFA's YouTube, blocked only in Sweden and Croatia. Nothing published yet for 2026/27 (UEFA.tv has no Women's Europa Cup section); check again in January before the quarter-finals",
+      "checked": "2026-11-25",
+      "confidence": "guide",
+      "source": "https://www.uefa.com/womenseuropacup/news/02a3-203921780e8c-011c8af10ee9-1000--where-to-watch-the-women-s-europa-cup-final-hammarby-vs-/"
+    },
     "usa.nwsl": {
       "service": "NWSL+",
       "free": true,

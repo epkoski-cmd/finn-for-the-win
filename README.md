@@ -48,16 +48,16 @@ We try to ask ESPN as little as possible. A normal run makes about **500 request
 
 | What | Per run |
 |---|---|
-| Matches per competition and day: 54 competitions × 9 days (today, the next 7 days, plus the US day before) | 486 |
+| Matches per competition and day: 55 competitions × 9 days (today, the next 7 days, plus the US day before) | 495 |
 | Lineups and goals for today's started matches | 10–40 |
 | Each club's league fixture list (clubs with Finns), for matches after the coming week: **once a day**, on the day's first run | ~55 |
 
 - Past days are taken from the history once they've been fetched after they end (normally on the day's first run).
 - League names and national team players' clubs are remembered in the player list's `cache` until the weekly rebuild.
-- The player list rebuild is about 700 requests: weekly, or daily during transfer windows.
+- The player list rebuild is about 750 requests (league squads plus the Women's Europa Cup's ~45 squads): weekly, or daily during transfer windows.
 - The update runs 4× a day, plus on every push, except pushes that only change `.md` files (IDEAS.md, README.md…).
 
-So a normal day is about 2,200 requests (until 2026-11-22 it was about 2,950).
+So a normal day is about 2,250 requests (until 2026-11-22 it was about 2,950).
 
 ## Running it
 
@@ -92,6 +92,9 @@ Later runs reuse the saved player list and are quicker.
 - Not covered yet: domestic cups and some leagues (e.g. Poland, Nordic second tiers).
 - Women's football: the data source has the English, Spanish, French, Dutch, US, Canadian, Australian and Mexican leagues,
   the Women's Champions League and Helmarit, but not Sweden, Germany, Italy, Norway or Denmark, where many Finnish women play.
+  The Women's Europa Cup's squads are scanned too (`SCANNED_CUPS`), so Finns at Swedish, Norwegian and Danish clubs show up
+  for their **cup** matches only; the All Finns page marks them "only cup matches shown" in the Not tracked yet list.
+  Women's Europa Cup streaming in Finland (UEFA.tv) is unconfirmed for 2026/27: re-check before the February quarter-finals.
 - Club squad lists sometimes miss a player (e.g. Leo Walta at LAFC). The script therefore looks up the club of every
   Finland national team player of the last year (`national_team_players.json`) it hasn't found, and adds them if their club is in a league we follow. Players at Finnish
   clubs are skipped on purpose; Finnish clubs are recognised by a code starting with `fin.`, plus `FINNISH_CLUBS_WITHOUT_CODE`.

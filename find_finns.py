@@ -96,6 +96,7 @@ WRONG_CLUBS = {
 # National team players at these clubs aren't shown as "not followed yet".
 FINNISH_CLUBS_WITHOUT_CODE = {
     "133594": "IF Gnistan Helsinki",
+    "131825": "HJK Helsinki (women)",   # in the Women's Europa Cup
 }
 
 # Women's football. The data source has fewer women's leagues: Sweden,
@@ -106,7 +107,12 @@ WOMEN_LEAGUES = [
     "usa.nwsl", "usa.w.usl.1",            # USA: NWSL + USL Super League
     "can.w.nsl", "aus.w.1", "mex.w.1",    # Canada, Australia, Mexico
 ]
-WOMEN_CUPS = ["uefa.wchampions"]
+WOMEN_CUPS = ["uefa.wchampions", "uefa.w.europa"]
+# Cups whose squads we DO scan for Finns. Many clubs in the Women's Europa Cup
+# play in leagues the data source doesn't have (Sweden, Norway, Denmark), so
+# this is the only way to find their Finns. Their league matches stay untracked;
+# we only see their cup matches. Finnish clubs (HJK) are skipped.
+SCANNED_CUPS = ["uefa.w.europa"]
 WOMEN_NATIONAL_TEAM_COMPS = [
     "fifa.wworldq.uefa",  # World Cup qualifiers
     "uefa.w.nations",     # Nations League
@@ -116,7 +122,7 @@ WOMEN_NATIONAL_TEAM_COMPS = [
 ]
 FINLAND_WOMEN_TEAM_ID = "7536"   # Helmarit
 
-ALL_LEAGUES = DOMESTIC_LEAGUES + WOMEN_LEAGUES          # squads we scan for Finns
+ALL_LEAGUES = DOMESTIC_LEAGUES + WOMEN_LEAGUES          # leagues whose squads we scan for Finns
 WOMEN_COMPETITIONS = set(WOMEN_LEAGUES + WOMEN_CUPS + WOMEN_NATIONAL_TEAM_COMPS)
 FINLAND_TEAM_IDS = {FINLAND_TEAM_ID, FINLAND_WOMEN_TEAM_ID}
 
@@ -190,8 +196,10 @@ def load_finnish_players():
     if PLAYERS_FILE.exists():
         saved = json.loads(PLAYERS_FILE.read_text())
         age = datetime.now(timezone.utc) - datetime.fromisoformat(saved["updated"])
-        # (A list saved before women's leagues were added is rebuilt.)
-        if age.days < max_age and "teams" in saved and all("women" in p for p in saved["players"]):
+        # (A list saved before women's leagues were added, or before the
+        # scanned cups changed, is rebuilt.)
+        if (age.days < max_age and "teams" in saved and all("women" in p for p in saved["players"])
+                and saved.get("scanned_cups", []) == SCANNED_CUPS):
             print(f"Using saved list of {len(saved['players'])} Finnish players.")
             return saved["players"], saved["teams"]
 
@@ -201,6 +209,16 @@ def load_finnish_players():
     for league in ALL_LEAGUES:
         for team in espn.league_teams(league):
             teams.append((league, team))
+    # ...plus the teams in SCANNED_CUPS that we haven't seen yet. A club that
+    # is in one of our leagues keeps that league (a club has the same ID
+    # everywhere), and Finnish clubs are skipped.
+    seen = {team["id"] for _, team in teams}
+    for cup in SCANNED_CUPS:
+        for team in espn.league_teams(cup):
+            if (team["id"] not in seen and not team["slug"].startswith("fin.")
+                    and team["id"] not in FINNISH_CLUBS_WITHOUT_CODE):
+                teams.append((cup, team))
+                seen.add(team["id"])
 
     # ...then every squad. This is ~550 requests, so we run several at once.
     def finns_in_squad(league_and_team):
@@ -223,7 +241,8 @@ def load_finnish_players():
     # can be recognised later even if no Finn is in its squad list.
     team_table = {team["id"]: {"league": league, "name": team["name"]} for league, team in teams}
     PLAYERS_FILE.write_text(json.dumps(
-        {"updated": datetime.now(timezone.utc).isoformat(), "players": players, "teams": team_table},
+        {"updated": datetime.now(timezone.utc).isoformat(), "players": players, "teams": team_table,
+         "scanned_cups": SCANNED_CUPS},
         ensure_ascii=False, indent=2))
     print(f"Found {len(players)} Finnish players in {len(teams)} squads.")
     return players, team_table

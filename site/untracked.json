@@ -1,7 +1,7 @@
 {
   "_about": "Edited by hand. Finnish players (men and women) we know about, but whose leagues our data source doesn't cover, so the site can't show their matches. Shown on the All Finns page under 'Not tracked yet'. Update 'checked' when you check the list. 'women': true = shown in the Women and All views. Players at Finnish clubs are left out on purpose: the site covers Finns playing abroad.",
-  "checked": "2026-11-18",
-  "source": "Finland men's and women's national team squads (Wikipedia, June 2026) and the clubs of recent national team players",
+  "checked": "2026-11-25",
+  "source": "Finland men's and women's national team squads (Wikipedia, June 2026) and the clubs of recent national team players; Women's Europa Cup squads (2026-11-25)",
   "leagues": [
     {
       "name_fi": "Puola: Ekstraklasa",
@@ -43,10 +43,6 @@
           "club": "Hammarby"
         },
         {
-          "name": "Katariina Kosola",
-          "club": "Malmö FF"
-        },
-        {
           "name": "Helmi Raijas",
           "club": "Växjö DFF"
         },
@@ -69,6 +65,10 @@
       "name_en": "Norway: Toppserien",
       "women": true,
       "players": [
+        {
+          "name": "Katariina Kosola",
+          "club": "Vålerenga"
+        },
         {
           "name": "Nea Lehtola",
           "club": "Brann"
@@ -107,6 +107,10 @@
       "name_en": "Denmark: Kvindeligaen",
       "women": true,
       "players": [
+        {
+          "name": "Lilli Halttunen",
+          "club": "Brøndby IF"
+        },
         {
           "name": "Milla-Maj Majasaari",
           "club": "Fortuna Hjørring"

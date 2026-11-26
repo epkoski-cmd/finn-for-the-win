@@ -4,13 +4,16 @@ A running list. Pick one per session; move it to **Done** when it's live.
 Write ideas down as soon as they come up, even half-formed ones.
 
 ## Next
+- **Re-check Women's Europa Cup streaming in January** – UEFA.tv for Finland, before the quarter-finals
+  on 3 and 10 Feb 2027. If confirmed, set `uefa.w.europa` to official with a link in `streaming_fi.json`.
 
 ## Maybe later
 - **Share a single match or player** – e.g. "Pohjanpalo scored twice" as its own picture.
 - **Player page** – one player's recent matches, goals and next games. When clicking on a players name, a page opens, shows the players name, team, position, result of last match and next match, link to add next match to my calendar and subscribe to players calendar.
 - **Comical player caricatures** – We most likely cannot pull images of players from some site due to copyright reasons. We can find images of players, at least most likely. It would be big job, but we could create caricatures of all players. We would need a system that notifies us when a new player is added to the site, and reminds us to create a caricature. Before that image has been created, or if a picture doesn't exist and we cannot create it, we could have default male and female caricatures for different positions. This idea requires a cost-benefit analysis. We don't know yet how many tokens a single image would require. 
 - **Women's leagues we can't track yet** – find a free data source for Damallsvenskan,
-  Toppserien, Serie A Femminile and Kvindeligaen (many Helmarit players are there).
+  Toppserien, Serie A Femminile and Kvindeligaen (many Helmarit players are there). Checked 2026-11-25:
+  none are in ESPN, and only WSL 2 (England) is clearly free to watch in Finland (league's YouTube).
 - **Notifications** ("your player is in the starting lineup") – needs a server or push
   service; a bigger learning project.
 - **User accounts** – favourites on all devices; mainly as a learning exercise.
@@ -62,3 +65,5 @@ Write ideas down as soon as they come up, even half-formed ones.
   the big five leagues…). Separate men's and women's rankings; the All view shows one of each. Skipped once lineups show
   every Finn on the bench, and on days with only one match.
 - WSL in Finland: free on the league's own YouTube channel (no Finnish TV partner), confirmed from the league's TV guide.
+- Women's Europa Cup: its squads are scanned, so Finns at Brann, Hammarby and Brøndby show up for cup matches
+  (streaming on UEFA.tv still unconfirmed for 2026/27).

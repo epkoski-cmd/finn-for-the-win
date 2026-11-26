@@ -100,6 +100,7 @@ const TEXTS = {
     untrackedChecked: date => "Lista on koottu käsin maajoukkueiden kokoonpanoista ja tarkistettu " + date + ". Seurat ovat voineet vaihtua sen jälkeen.",
     otherLeagues: "Muut sarjat",
     untrackedNoneKnown: "Ei tiedossa olevia suomalaisia juuri nyt.",
+    untrackedCupOnly: "vain cup-ottelut näkyvät",
 
     // This week page
     navWeek: "Viikko",
@@ -230,6 +231,7 @@ const TEXTS = {
     untrackedChecked: date => "Listed by hand from national team squads, checked " + date + ". Clubs may have changed since.",
     otherLeagues: "Other leagues",
     untrackedNoneKnown: "No Finns known there right now.",
+    untrackedCupOnly: "only cup matches shown",
 
     // This week page
     navWeek: "This week",
@@ -325,6 +327,7 @@ const LEAGUE_NAMES_FI = {
   "mex.w.1": "Meksikon Liga MX Femenil",
   // Women's cups and national team competitions
   "uefa.wchampions": "Naisten Mestarien liiga",
+  "uefa.w.europa": "Naisten Eurooppa-cup",
   "fifa.wworldq.uefa": "Naisten MM-karsinnat",
   "uefa.w.nations": "Naisten Kansojen liiga",
   "uefa.weuro": "Naisten EM-kisat",

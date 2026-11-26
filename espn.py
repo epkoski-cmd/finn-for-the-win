@@ -38,11 +38,12 @@ def get_json(url, retries=3):
 def league_teams(league):
     """All teams in a league, e.g. league="esp.1" (LaLiga).
 
-    Returns a list like [{"id": "96", "name": "Alavés"}, ...]
+    Returns a list like [{"id": "96", "name": "Alavés", "slug": "esp.alaves"}, ...]
     """
     data = get_json(BASE_URL + league + "/teams")
     teams = data["sports"][0]["leagues"][0]["teams"]
-    return [{"id": t["team"]["id"], "name": t["team"]["displayName"]} for t in teams]
+    return [{"id": t["team"]["id"], "name": t["team"]["displayName"],
+             "slug": t["team"].get("slug") or ""} for t in teams]
 
 
 def player_club(player_id):
