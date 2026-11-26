@@ -92,7 +92,7 @@ function setUpShareButton() {
 //   The link preview pictures are drawn by preview.html, see that file.
 // ---------------------------------------------------------------------------
 
-// The site's fonts load from Google Fonts. Wait for them, or the canvas
+// The site's fonts load from our own fonts/ folder. Wait for them, or the canvas
 // would quietly use a plain fallback font.
 async function loadCardFonts() {
   try {

@@ -23,6 +23,7 @@ outside it (`../finn-business-notes/`). Never copy them into this repo, commits 
 - Text only: no logos, player photos or club badges.
 - **Privacy:** no cookies, no accounts, no personal data. Favourites and settings stay in the
   visitor's browser (`localStorage`). The only counter is GoatCounter (anonymous).
+  Fonts are served from `site/fonts/`: never load fonts, scripts or styles from Google or other outside services.
 - No servers or paid services. Everything runs on GitHub Actions + GitHub Pages for free.
 - Don't promise what we can't deliver (e.g. no "ask us to follow" for leagues we can't track).
 

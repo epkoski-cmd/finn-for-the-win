@@ -41,6 +41,7 @@ This is called **caching**: do the slow work once, hand everyone the result.
 | `site/preview.html` | Hidden helper page. The workflow opens it in Chrome and saves screenshots as `preview-site.png` and `preview-week.png`: the pictures shown when a link is pasted into WhatsApp etc. Always English. |
 | `site/shared.js` | Code both pages use: language switch, favourite players, calendar files and the error-report link. Also `MATCH_OF_THE_DAY_RANKING`: the order of competitions, biggest first, used to pick the match of the day (move a line to change the order). |
 | `site/untracked.json` | Edited by hand: Finnish players in leagues we can't follow (e.g. Damallsvenskan), shown on the All Finns page. |
+| `site/fonts/` | The site's two fonts (Barlow Condensed, Inter), served from our own site so visitors' browsers don't contact Google. `fonts.css` lists them; the OFL files are their free licences. |
 | `site/texts.js` | Every text on the site in Finnish and English. Edit wordings here. At the end, `LEAGUE_NAMES_FI`: Finnish league names by league code (English shows the data source's name). |
 
 ## Requests to the data source

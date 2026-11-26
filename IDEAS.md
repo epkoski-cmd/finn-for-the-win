@@ -5,11 +5,6 @@ Write ideas down as soon as they come up, even half-formed ones.
 
 ## Next
 Before sharing the site with the football team parents (stage 1 in `VISION.md`), in this order:
-- **Phone first impression, part 2** – (part 1 is done, see below):
-  - Show the star tip only until the visitor stars their first player.
-  - Hide "Watch:" on finished matches.
-  - Serve the fonts from our own site instead of Google Fonts (visitors' IP addresses now go to Google,
-    which goes against our privacy promise).
 - **Ask friends and the football team parents** – share the link, then a short anonymous survey in Finnish.
 
 Dated:
@@ -92,3 +87,6 @@ Dated:
 - Phone first impression, part 1: match cards about 30% shorter on phones (teams on one line, a short
   "Lineup not out yet" line instead of a long sentence, club names only when both teams have Finns), and the
   match of the day banner names the Finn(s) as its headline.
+- Phone first impression, part 2: no "Watch:" on finished matches, and the fonts come from our own site
+  (`site/fonts/`) instead of Google Fonts, so visitors' browsers no longer contact Google. (The star tip
+  already disappeared once a player is starred, so it needed no change.)

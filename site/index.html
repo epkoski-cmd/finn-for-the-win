@@ -18,8 +18,7 @@
 <meta property="og:image:alt" content="Finn FTW: Finnish footballers playing abroad today, and where to watch them in Finland.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css?v=__VERSION__">
 <link rel="stylesheet" href="style.css?v=__VERSION__">
 </head>
 <body data-title="pageTitle">
@@ -297,7 +296,9 @@ function matchCard(m) {
     actions.append(cal);
   }
   actions.append(reportLink);
-  foot.append(watch, actions);
+  // A finished match can't be watched live any more, so "Watch:" is left out.
+  if (m.state !== "post") foot.append(watch);
+  foot.append(actions);
   body.append(foot);
 
   card.append(body);
