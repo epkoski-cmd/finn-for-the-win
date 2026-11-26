@@ -6,10 +6,11 @@ Write ideas down as soon as they come up, even half-formed ones.
 ## Next
 
 ## Maybe later
+- **Share a single match or player** – e.g. "Pohjanpalo scored twice" as its own picture.
+- **Player page** – one player's recent matches, goals and next games. When clicking on a players name, a page opens, shows the players name, team, position, result of last match and next match, link to add next match to my calendar and subscribe to players calendar.
+- **Comical player caricatures** – We most likely cannot pull images of players from some site due to copyright reasons. We can find images of players, at least most likely. It would be big job, but we could create caricatures of all players. We would need a system that notifies us when a new player is added to the site, and reminds us to create a caricature. Before that image has been created, or if a picture doesn't exist and we cannot create it, we could have default male and female caricatures for different positions. This idea requires a cost-benefit analysis. We don't know yet how many tokens a single image would require. 
 - **Women's leagues we can't track yet** – find a free data source for Damallsvenskan,
   Toppserien, Serie A Femminile and Kvindeligaen (many Helmarit players are there).
-- **Player page** – one player's recent matches, goals and next games.
-- **Share a single match or player** – e.g. "Pohjanpalo scored twice" as its own picture.
 - **Notifications** ("your player is in the starting lineup") – needs a server or push
   service; a bigger learning project.
 - **User accounts** – favourites on all devices; mainly as a learning exercise.
