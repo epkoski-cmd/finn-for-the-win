@@ -6,7 +6,10 @@ where each match can be watched legally in Finland. Built as a vibe-coding
 and keep the code readable for a beginner.
 
 Live site: https://epkoski-cmd.github.io/finn-for-the-win/ (repo `epkoski-cmd/finn-for-the-win`).
+**Read `VISION.md` first**: the goal every idea is measured against.
 Ideas and next steps live in `IDEAS.md`. File-by-file overview in `README.md`.
+**This repo is public.** Business plans, revenue, costs and personal goals live in a private folder
+outside it (`../finn-business-notes/`). Never copy them into this repo, commits or the site.
 
 ## Who uses it
 - Friends and family in Finland, **mostly on phones**, often in Finnish.

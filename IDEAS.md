@@ -4,6 +4,15 @@ A running list. Pick one per session; move it to **Done** when it's live.
 Write ideas down as soon as they come up, even half-formed ones.
 
 ## Next
+Before sharing the site with the football team parents (stage 1 in `VISION.md`), in this order:
+- **Decide the name** – stay "Finn for the Win" or become "Finns for the Win" (other sports later)?
+- **Own address** (custom domain) for that name, instead of github.io: easier for non-technical
+  people, and links shared now keep working. GitHub Pages supports it for free (domain ~€15–25/year).
+- **Phone first impression** – look at the day page as a stranger would: one line saying what the site is,
+  less clutter, quick to load.
+- **Ask friends and the football team parents** – share the link, then a short anonymous survey in Finnish.
+
+Dated:
 - **Re-check Women's Europa Cup streaming in January** – UEFA.tv for Finland, before the quarter-finals
   on 3 and 10 Feb 2027. If confirmed, set `uefa.w.europa` to official with a link in `streaming_fi.json`.
 
@@ -17,8 +26,15 @@ Write ideas down as soon as they come up, even half-formed ones.
 - **Notifications** ("your player is in the starting lineup") – needs a server or push
   service; a bigger learning project.
 - **User accounts** – favourites on all devices; mainly as a learning exercise.
-- **Own address** (custom domain) instead of github.io.
-- Ask friends what they'd want to see.
+- **Accuracy check** – after each run, an automatic report of oddities (a Finn vanished, a club changed,
+  a streaming entry not checked this season, data source errors). Needed before stage 2.
+- **Licensed data source** – before showing the site to strangers. API-Football is a candidate: first check
+  on its free tier whether it can find players by nationality as easily as ESPN.
+- **Other sports ("Finns for the Win")** – ice hockey first (most Finns abroad, biggest audience),
+  then maybe basketball, F1, American football. Each sport needs its own streaming table and data checks.
+- **Finns in US college sports on Disney+** – Miikka Muurinen (college basketball) can be watched on Disney+
+  in Finland, which also shows college American football and maybe college soccer. Are there Finns in
+  college soccer, and which matches does Disney+ show in Finland?
 
 ## Decided against
 - **Poland and Czechia (Håkans, Mahuta)** – checked 2026-11-25; they stay under "Not tracked yet".
