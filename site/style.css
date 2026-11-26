@@ -138,6 +138,8 @@ details.squad .finns { margin-top: 6px; }
 .foot-actions { display: flex; flex-wrap: wrap; gap: 4px 16px; }
 .filters .link-btn { justify-self: start; text-align: left; }
 .lineup-note { margin: 0; font-size: 0.82rem; color: var(--muted); font-style: italic; }
+/* The short "lineup not out yet" line on club matches sits close to the players */
+.lineup-note.short { margin-top: -4px; }
 .watch { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; font-size: 0.9rem; min-width: 0; }
 .watch .label { color: var(--muted); }
 .watch .svc { font-weight: 600; }
@@ -166,11 +168,13 @@ footer p { margin: 0; }
   h1 { font-size: 2.1rem; }
   .match { grid-template-columns: 52px 1fr; }
   .time { font-size: 1.15rem; padding-left: 10px; }
-  .teams { grid-template-columns: 1fr; gap: 2px; }
+  /* Teams on one line ("Kairat Almaty vs Mjällby AIF"), wrapping only when names are long */
+  .teams { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
   .team.away { text-align: left; }
   .team.away.finnish::before { content: ""; }
   .team.away.finnish::after { content: " ●"; color: var(--accent); font-size: 0.7em; vertical-align: 0.15em; }
-  .score { justify-self: start; }
+  .score { font-size: 1.15rem; padding: 0 7px; }
+  .score.vs { font-size: 0.9rem; padding: 0; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .day { transition: background-color 120ms, color 120ms; }
@@ -206,7 +210,10 @@ html { scroll-padding-top: 12px; }
 .motd-label::before { content: "▶ "; }
 .motd-teams { font-family: var(--display); font-weight: 700; font-size: 1.35rem; line-height: 1.15; overflow-wrap: anywhere; }
 .motd-info { font-size: 0.85rem; opacity: 0.9; }
-.motd:hover .motd-teams { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+/* When the banner names the Finn(s): name big, match below it */
+.motd-finns { font-family: var(--display); font-weight: 700; font-size: 1.35rem; line-height: 1.15; overflow-wrap: anywhere; }
+.motd-match { font-weight: 600; font-size: 0.95rem; }
+.motd:hover .motd-teams, .motd:hover .motd-finns { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 /* The picked match's card: a badge in the competition line and an accent border */
 .match.motd-card { border-color: var(--accent); border-width: 2px; }
 .tag-motd { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0 7px; margin-right: 6px; border-radius: 999px; background: var(--accent); color: var(--accent-fg); vertical-align: 0.1em; }

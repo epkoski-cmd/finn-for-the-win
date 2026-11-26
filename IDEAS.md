@@ -5,16 +5,22 @@ Write ideas down as soon as they come up, even half-formed ones.
 
 ## Next
 Before sharing the site with the football team parents (stage 1 in `VISION.md`), in this order:
-- **Decide the name** – stay "Finn for the Win" or become "Finns for the Win" (other sports later)?
-- **Own address** (custom domain) for that name, instead of github.io: easier for non-technical
-  people, and links shared now keep working. GitHub Pages supports it for free (domain ~€15–25/year).
-- **Phone first impression** – look at the day page as a stranger would: one line saying what the site is,
-  less clutter, quick to load.
+- **Phone first impression, part 2** – (part 1 is done, see below):
+  - Show the star tip only until the visitor stars their first player.
+  - Hide "Watch:" on finished matches.
+  - Serve the fonts from our own site instead of Google Fonts (visitors' IP addresses now go to Google,
+    which goes against our privacy promise).
 - **Ask friends and the football team parents** – share the link, then a short anonymous survey in Finnish.
 
 Dated:
 - **Re-check Women's Europa Cup streaming in January** – UEFA.tv for Finland, before the quarter-finals
   on 3 and 10 Feb 2027. If confirmed, set `uefa.w.europa` to official with a link in `streaming_fi.json`.
+
+## On the back burner
+- **Rename to "Finns for the Win" and get our own address** – name decided 2026-11-26. Waiting until the site
+  has had more work. Then buy the domain (finnsforthewin.fi/.com and finnsftw.fi/.com were free on 2026-11-26),
+  connect it to GitHub Pages, and change the name on the site (titles, `texts.js`, share pictures).
+  Ideally done before the link goes to the football team parents, so shared links don't change later.
 
 ## Maybe later
 - **Share a single match or player** – e.g. "Pohjanpalo scored twice" as its own picture.
@@ -83,3 +89,6 @@ Dated:
 - WSL in Finland: free on the league's own YouTube channel (no Finnish TV partner), confirmed from the league's TV guide.
 - Women's Europa Cup: its squads are scanned, so Finns at Brann, Hammarby and Brøndby show up for cup matches
   (streaming on UEFA.tv still unconfirmed for 2026/27).
+- Phone first impression, part 1: match cards about 30% shorter on phones (teams on one line, a short
+  "Lineup not out yet" line instead of a long sentence, club names only when both teams have Finns), and the
+  match of the day banner names the Finn(s) as its headline.

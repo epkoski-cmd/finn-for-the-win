@@ -43,7 +43,7 @@
 
   <footer>
     <p id="updated"></p>
-    <p data-t="footer">Times are Finnish time. Match data from public sports data feeds, and it may contain errors. Assists may be missing for some matches. Streaming info is checked by hand. Visits are counted anonymously, with no cookies.</p>
+    <p data-t="footer">Times are Finnish time. Match data from public sports data feeds, and it may contain errors. Before lineups are out, we show the Finns in each club's squad; they may not play. Assists may be missing for some matches. Streaming info is checked by hand. Visits are counted anonymously, with no cookies.</p>
     <p><a class="link-btn" id="general-report" target="_blank" rel="noopener" data-t="reportGeneral">Spotted an error? Tell us</a></p>
   </footer>
 </div>
@@ -132,13 +132,31 @@ function renderMatchOfTheDay(matches) {
     const label = picks.length === 1 ? t("matchOfTheDay") : t(m.women ? "matchOfTheDayWomen" : "matchOfTheDayMen");
     const played = m.state !== "pre";
     const comp = m.national_team ? nationalTeamName(m.women) : leagueName(m.league, m.league_name);
-    banner.append(
-      el("span", "motd-label", label),
-      el("span", "motd-teams", m.home.name + (played ? " " + m.home.score + "–" + m.away.score + " " : " – ") + m.away.name),
-      el("span", "motd-info", comp + " · " + clockTime(m.kickoff_fi)),
-    );
+    const teams = m.home.name + (played ? " " + m.home.score + "–" + m.away.score + " " : " – ") + m.away.name;
+    banner.append(el("span", "motd-label", label));
+    // The Finn(s) are the headline; Finland's own matches keep the teams as the headline.
+    const names = m.national_team ? "" : motdNames(m);
+    if (names) {
+      banner.append(el("span", "motd-finns", names), el("span", "motd-match", teams));
+    } else {
+      banner.append(el("span", "motd-teams", teams));
+    }
+    banner.append(el("span", "motd-info", comp + " · " + clockTime(m.kickoff_fi)));
     box.append(banner);
   }
+}
+
+// The banner's headline: "Ukko Happonen", "A ja B", or "Eriksson, Lähteenmäki + 1 muu".
+// Once lineups are out, only the Finns who play are named.
+function motdNames(m) {
+  const all = m.home.finns.concat(m.away.finns);
+  const playing = all.filter(f => !f.role || f.role === "started" || f.role === "came on");
+  const finns = playing.length ? playing : all;
+  if (finns.length === 0) return "";
+  if (finns.length === 1) return finns[0].name;
+  if (finns.length === 2) return finns[0].name + " " + t("and") + " " + finns[1].name;
+  const surname = f => f.name.split(" ").pop();
+  return surname(finns[0]) + ", " + surname(finns[1]) + " " + t("andMore", finns.length - 2);
 }
 
 function renderMatches() {
@@ -236,10 +254,13 @@ function matchCard(m) {
     }
   } else {
     const ul = el("ul", "finns");
-    for (const side of [m.home, m.away]) side.finns.forEach(f => ul.append(finnItem(f, side.name)));
+    // The club is shown only when both teams have Finns; otherwise the dot
+    // after the team name already tells which team they play for.
+    const bothSides = m.home.finns.length && m.away.finns.length;
+    for (const side of [m.home, m.away]) side.finns.forEach(f => ul.append(finnItem(f, bothSides ? side.name : null)));
     body.append(ul);
     if (!played) {
-      body.append(el("p", "lineup-note", t("clubLineupNote")));
+      body.append(el("p", "lineup-note short", t("clubLineupNote")));
     }
   }
 

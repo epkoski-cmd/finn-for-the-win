@@ -50,7 +50,7 @@ const TEXTS = {
     genderAll: "Kaikki",
     finnsPlayed: (n, goals) => n + " suomalaista pelasi" + (goals ? " · ⚽ " + (goals === 1 ? "1 maali" : goals + " maalia") : ""),
     ntLineupNote: "Kokoonpanoa ei ole vielä vahvistettu. Kokoonpanot julkaistaan yleensä noin tunti ennen ottelun alkua.",
-    clubLineupNote: "Kokoonpanoa ei ole vielä vahvistettu. Nämä suomalaiset kuuluvat seuran pelaajistoon, mutta eivät välttämättä pelaa.",
+    clubLineupNote: "Kokoonpano ei vielä tiedossa",
     watch: "Katso:",
     free: "Maksuton",
     selectedOnly: "vain osa otteluista",
@@ -67,8 +67,10 @@ const TEXTS = {
     matchOfTheDay: "Päivän ottelu",
     matchOfTheDayMen: "Päivän ottelu · miehet",
     matchOfTheDayWomen: "Päivän ottelu · naiset",
+    and: "ja",
+    andMore: n => "+ " + n + (n === 1 ? " muu" : " muuta"),
     addAllToCalendar: n => "📅 Lisää pelaajiesi " + (n === 1 ? "seuraava ottelu" : "seuraavat " + n + " ottelua") + " kalenteriin",
-    footer: "Ajat ovat Suomen aikaa. Otteluiden tiedot tulevat julkisista urheilutietolähteistä, ja niissä voi olla virheitä. Maalisyöttöjä voi puuttua joistakin otteluista. Katselutiedot tarkistetaan käsin. Käynnit lasketaan nimettömästi, ilman evästeitä.",
+    footer: "Ajat ovat Suomen aikaa. Otteluiden tiedot tulevat julkisista urheilutietolähteistä, ja niissä voi olla virheitä. Ennen kokoonpanojen julkaisua näytetään seuran pelaajistoon kuuluvat suomalaiset, jotka eivät välttämättä pelaa. Maalisyöttöjä voi puuttua joistakin otteluista. Katselutiedot tarkistetaan käsin. Käynnit lasketaan nimettömästi, ilman evästeitä.",
 
     // Calendar events
     calFinns: "Suomalaiset: ",
@@ -181,7 +183,7 @@ const TEXTS = {
     genderAll: "All",
     finnsPlayed: (n, goals) => n + " Finns played" + (goals ? " · ⚽ " + (goals === 1 ? "1 goal" : goals + " goals") : ""),
     ntLineupNote: "Lineup not confirmed yet. Lineups are usually announced about an hour before kickoff.",
-    clubLineupNote: "Lineup not confirmed yet. These Finns are in the club's squad, but may not play.",
+    clubLineupNote: "Lineup not out yet",
     watch: "Watch:",
     free: "Free",
     selectedOnly: "selected matches only",
@@ -198,8 +200,10 @@ const TEXTS = {
     matchOfTheDay: "Match of the day",
     matchOfTheDayMen: "Match of the day · men",
     matchOfTheDayWomen: "Match of the day · women",
+    and: "and",
+    andMore: n => "+ " + n + " more",
     addAllToCalendar: n => "📅 Add your players' next " + (n === 1 ? "match" : n + " matches") + " to your calendar",
-    footer: "Times are Finnish time. Match data from public sports data feeds, and it may contain errors. Assists may be missing for some matches. Streaming info is checked by hand. Visits are counted anonymously, with no cookies.",
+    footer: "Times are Finnish time. Match data from public sports data feeds, and it may contain errors. Before lineups are out, we show the Finns in each club's squad; they may not play. Assists may be missing for some matches. Streaming info is checked by hand. Visits are counted anonymously, with no cookies.",
 
     // Calendar events
     calFinns: "Finns: ",
