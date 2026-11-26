@@ -5,6 +5,7 @@ Write ideas down as soon as they come up, even half-formed ones.
 
 ## Next
 Before sharing the site with the football team parents (stage 1 in `VISION.md`), in this order:
+- **Add international matches for Finnish clubs to tge schedule** - We missed, for example, Braga vs KuPS on Nov. 26, 2026. in addition to away matches abroad, we shouod kist their home matches. We do not add players who play in tge domestic league to the tracking. 
 - **Ask friends and the football team parents** – share the link, then a short anonymous survey in Finnish.
 
 Dated:
