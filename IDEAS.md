@@ -5,7 +5,8 @@ Write ideas down as soon as they come up, even half-formed ones.
 
 ## Next
 Before sharing the site with the football team parents (stage 1 in `VISION.md`), in this order:
-- **Add international matches for Finnish clubs to tge schedule** - We missed, for example, Braga vs KuPS on Nov. 26, 2026. in addition to away matches abroad, we shouod kist their home matches. We do not add players who play in tge domestic league to the tracking. 
+- **Add goslkeepers to the 'This Werk' page** - For example, Hradecky played for AS Monaco in their win on Nov. 26. It should me noted in the recap.  
+- **Add international matches for Finnish clubs to the schedule** - We missed, for example, Braga vs KuPS on Nov. 26, 2026. in addition to away matches abroad, we shouod kist their home matches. We do not add players who play in tge domestic league to the tracking. 
 - **Follow Finns in specific lesgues** – As a user, I wabt to follow mayches wirh Finns playing in specific leagues. I might be interested in some leavues more than others, or I may not be interested in knowing about matches in leagues I have no wat of streaming. 
 - **Ask friends and the football team parents** – share the link, then a short anonymous survey in Finnish.
 
@@ -20,6 +21,7 @@ Dated:
   Ideally done before the link goes to the football team parents, so shared links don't change later.
 
 ## Maybe later
+- **Research wats to make the site more fun and interesting** - What would be feasible ways to add a hit of storytelling to the site. What is the anticipation for a match. Did the result go as expected? who were the Finnish heroes?
 - **Allow users to show interest in leagues not streamable in Finland** – It might be useful information for broadcasters and streaming sites to know how much demand there is for viewing mayches not covered by their rights currently. Though we have little power to impact this, it can tell us which leagues to focus on when looking for international streaming alternatives. For example, DAZN may show some leagues and is a legal option. 
 - **Share a single match or player** – e.g. "Pohjanpalo scored twice" as its own picture.
 - **Player page** – one player's recent matches, goals and next games. When clicking on a players name, a page opens, shows the players name, team, position, result of last match and next match, link to add next match to my calendar and subscribe to players calendar.
